@@ -1,8 +1,9 @@
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Search, ChevronDown, ChevronUp, AlertTriangle, Video, Play } from "lucide-react"
+import { Search, ChevronDown, ChevronUp, AlertTriangle, Video, Play, Star, Send, Loader2 } from "lucide-react"
 import { useState, useEffect, useCallback } from "react"
 import api from "@/lib/axios"
+import { useToast } from "@/hooks/use-toast"
 
 interface Answer {
   questionId: string
@@ -91,6 +92,13 @@ export function StudentAttempts({ quizTitle, quiz, onBack }: StudentAttemptsProp
   const [overviewExpanded, setOverviewExpanded] = useState(true)
   const [questionsExpanded, setQuestionsExpanded] = useState(true)
 
+  // Feedback state
+  const [feedbackText, setFeedbackText] = useState("")
+  const [feedbackRating, setFeedbackRating] = useState(0)
+  const [submittingFeedback, setSubmittingFeedback] = useState(false)
+  const [feedbackExpanded, setFeedbackExpanded] = useState(true)
+  const { toast } = useToast()
+
   const fetchQuizDetails = useCallback(async (quizId: string) => {
     try {
       const response = await api.get(`/teacher/quizzes/${quizId}`)
@@ -172,6 +180,70 @@ export function StudentAttempts({ quizTitle, quiz, onBack }: StudentAttemptsProp
   const handleViewDetails = (submission: Submission) => {
     setSelectedSubmission(submission)
     setShowDetails(true)
+    // Reset feedback form
+    setFeedbackText("")
+    setFeedbackRating(0)
+  }
+
+  // Submit feedback function
+  const handleSubmitFeedback = async () => {
+    if (!selectedSubmission || !feedbackText.trim() || feedbackRating === 0) {
+      toast({
+        title: "Error",
+        description: "Please provide both a rating and feedback message.",
+        variant: "destructive"
+      })
+      return
+    }
+
+    try {
+      setSubmittingFeedback(true)
+      const response = await api.post(`/teacher/submissions/${selectedSubmission.id}/feedback`, {
+        feedback: feedbackText.trim(),
+        rating: feedbackRating,
+        submissionType: "quiz",
+        submissionId: selectedSubmission.id
+      })
+
+      if (response.data.success) {
+        toast({
+          title: "Success",
+          description: "Feedback submitted successfully!",
+        })
+        setFeedbackText("")
+        setFeedbackRating(0)
+      }
+    } catch (error) {
+      console.error('Error submitting feedback:', error)
+      toast({
+        title: "Error",
+        description: "Failed to submit feedback. Please try again.",
+        variant: "destructive"
+      })
+    } finally {
+      setSubmittingFeedback(false)
+    }
+  }
+
+  // Star rating component
+  const StarRating = ({ rating, onRatingChange, readonly = false }: { rating: number, onRatingChange?: (rating: number) => void, readonly?: boolean }) => {
+    return (
+      <div className="flex items-center gap-1">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <button
+            key={star}
+            type="button"
+            onClick={() => !readonly && onRatingChange?.(star)}
+            className={`${readonly ? 'cursor-default' : 'cursor-pointer hover:scale-110'} transition-transform`}
+            disabled={readonly}
+          >
+            <Star
+              className={`h-6 w-6 ${star <= rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`}
+            />
+          </button>
+        ))}
+      </div>
+    )
   }
 
   // If showing details, render the detailed view
@@ -366,6 +438,69 @@ export function StudentAttempts({ quizTitle, quiz, onBack }: StudentAttemptsProp
                     </div>
                   </div>
                 ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Teacher Feedback Section */}
+        <div className="bg-white rounded-lg border border-gray-200 mt-4">
+          <button
+            type="button"
+            onClick={() => setFeedbackExpanded(!feedbackExpanded)}
+            className="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50"
+          >
+            <div className="flex items-center gap-2">
+              <Star className="h-5 w-5 text-yellow-500" />
+              <h2 className="text-lg font-medium">Give Feedback</h2>
+            </div>
+            {feedbackExpanded ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+          </button>
+
+          {feedbackExpanded && (
+            <div className="px-4 pb-4 border-t border-gray-100">
+              <div className="space-y-4 mt-4">
+                {/* Rating */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Rating
+                  </label>
+                  <StarRating rating={feedbackRating} onRatingChange={setFeedbackRating} />
+                </div>
+
+                {/* Feedback Text */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Feedback Message
+                  </label>
+                  <textarea
+                    value={feedbackText}
+                    onChange={(e) => setFeedbackText(e.target.value)}
+                    placeholder="Provide constructive feedback for the student..."
+                    rows={4}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--primary-500)] focus:border-[var(--primary-500)] transition-colors resize-none"
+                  />
+                </div>
+
+                {/* Submit Button */}
+                <Button
+                  onClick={handleSubmitFeedback}
+                  disabled={submittingFeedback || !feedbackText.trim() || feedbackRating === 0}
+                  className="button-primary w-full flex items-center justify-center gap-2"
+                  type="button"
+                >
+                  {submittingFeedback ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Submitting...
+                    </>
+                  ) : (
+                    <>
+                      <Send className="h-4 w-4" />
+                      Submit Feedback
+                    </>
+                  )}
+                </Button>
               </div>
             </div>
           )}
