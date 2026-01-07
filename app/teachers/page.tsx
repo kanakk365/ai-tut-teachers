@@ -76,7 +76,7 @@ export default function TeachersDashboard() {
   const fetchTeachers = useCallback(async (page = 1, search = "") => {
     try {
       setLoading(true)
-      let url = `/institution-admin/teachers?page=${page}&limit=${limit}`
+      let url = `/teacher/teachers?page=${page}&limit=${limit}`
 
       if (search.trim()) {
         url += `&search=${encodeURIComponent(search.trim())}`
@@ -165,7 +165,7 @@ export default function TeachersDashboard() {
       setIsSubmitting(true)
       setSubmitError("")
 
-      const response = await api.post('/institution-admin/teacher', {
+      const response = await api.post('/teacher/teacher', {
         name: formData.name.trim(),
         email: formData.email.trim(),
         password: formData.password
@@ -376,11 +376,10 @@ export default function TeachersDashboard() {
                         <TableCell className="py-4 px-6 text-gray-600">{teacher.email}</TableCell>
                         <TableCell className="py-4 px-6 text-gray-600">{teacher.institution.name}</TableCell>
                         <TableCell className="py-4 px-6">
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                            teacher.isActive
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${teacher.isActive
                               ? 'bg-[var(--primary-100)] text-[color:var(--primary-800)]'
                               : 'bg-red-100 text-red-800'
-                          }`}>
+                            }`}>
                             {teacher.isActive ? 'Active' : 'Inactive'}
                           </span>
                         </TableCell>

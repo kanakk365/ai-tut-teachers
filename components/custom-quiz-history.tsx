@@ -122,8 +122,8 @@ export function CustomQuizHistory({ onViewQuiz, onViewQuizById }: CustomQuizHist
     const fetchCustomQuizzes = async () => {
       try {
         setLoading(true)
-        const response = await api.get<ApiResponse<CustomQuizzesResponse>>('/institution-admin/custom-quizzes/get')
-        
+        const response = await api.get<ApiResponse<CustomQuizzesResponse>>('/teacher/custom-quizzes/get')
+
         if (response.data.success) {
           setQuizzes(response.data.data.quizzes)
         } else {
@@ -186,8 +186,8 @@ export function CustomQuizHistory({ onViewQuiz, onViewQuizById }: CustomQuizHist
         <h1 className="text-2xl font-semibold">Custom Quizzes History</h1>
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-          <Input 
-            placeholder="Search custom quizzes here" 
+          <Input
+            placeholder="Search custom quizzes here"
             className="pl-10 w-64 border-gray-200 focus:border-[var(--primary-500)] focus:ring-[var(--primary-500)]"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -218,7 +218,7 @@ export function CustomQuizHistory({ onViewQuiz, onViewQuizById }: CustomQuizHist
                 </td>
                 <td className="px-6 py-4 text-sm text-gray-600">{quiz.topic}</td>
                 <td className="px-6 py-4 text-sm text-gray-600">
-                  {quiz.classSection.standardName && quiz.classSection.sectionName 
+                  {quiz.classSection.standardName && quiz.classSection.sectionName
                     ? `${quiz.classSection.standardName} - ${quiz.classSection.sectionName}`
                     : quiz.classSection.standardName || 'Not assigned'
                   }
@@ -230,8 +230,8 @@ export function CustomQuizHistory({ onViewQuiz, onViewQuizById }: CustomQuizHist
                   {quiz.averageScore ? `${quiz.averageScore}%` : 'N/A'}
                 </td>
                 <td className="px-6 py-4">
-                  <Button 
-                    size="sm" 
+                  <Button
+                    size="sm"
                     className="px-4 py-1 text-sm font-medium rounded button-primary hover:bg-[var(--primary-600)]"
                     onClick={() => handleViewQuiz(quiz)}
                   >
@@ -282,7 +282,7 @@ export function CustomQuizAttempts({ quizId, quizTitle, onBack }: CustomQuizAtte
     const fetchQuizDetail = async () => {
       try {
         setLoading(true)
-        const response = await api.get(`/institution-admin/custom-quizzes/get/${quizId}`)
+        const response = await api.get(`/teacher/custom-quizzes/get/${quizId}`)
 
         if (response.data.success) {
           setQuizDetail(response.data.data.quiz)
@@ -407,9 +407,8 @@ export function CustomQuizAttempts({ quizId, quizTitle, onBack }: CustomQuizAtte
                 <div>
                   <div className="text-sm text-gray-600">Status</div>
                   <div className="font-medium">
-                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                      (selectedSubmission.score || 0) >= 60 ? 'bg-[var(--primary-100)] text-[color:var(--primary-800)]' : 'bg-red-100 text-red-800'
-                    }`}>
+                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${(selectedSubmission.score || 0) >= 60 ? 'bg-[var(--primary-100)] text-[color:var(--primary-800)]' : 'bg-red-100 text-red-800'
+                      }`}>
                       {(selectedSubmission.score || 0) >= 60 ? 'Passed' : 'Failed'}
                     </span>
                   </div>
@@ -435,9 +434,8 @@ export function CustomQuizAttempts({ quizId, quizTitle, onBack }: CustomQuizAtte
 
                       <div className="space-y-2">
                         <div>
-                          <span className={`text-sm font-medium ${
-                            answer.isCorrect ? 'text-[color:var(--primary-600)]' : 'text-red-600'
-                          }`}>
+                          <span className={`text-sm font-medium ${answer.isCorrect ? 'text-[color:var(--primary-600)]' : 'text-red-600'
+                            }`}>
                             Student's Answer: {answer.selectedOptionText || 'Not answered'} - {answer.isCorrect ? 'Correct' : 'Incorrect'}
                           </span>
                         </div>
@@ -552,9 +550,8 @@ export function CustomQuizAttempts({ quizId, quizTitle, onBack }: CustomQuizAtte
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-600">{formatDate(submission.submittedAt)}</td>
                       <td className="px-6 py-4 text-sm">
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          (submission.score || 0) >= 60 ? 'bg-[var(--primary-100)] text-[color:var(--primary-800)]' : 'bg-red-100 text-red-800'
-                        }`}>
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${(submission.score || 0) >= 60 ? 'bg-[var(--primary-100)] text-[color:var(--primary-800)]' : 'bg-red-100 text-red-800'
+                          }`}>
                           {(submission.score || 0) >= 60 ? 'Passed' : 'Failed'}
                         </span>
                       </td>

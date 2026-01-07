@@ -144,7 +144,7 @@ export default function ClassesPage() {
 
   // Teacher Assignment State
   const [showAssignTeacherModal, setShowAssignTeacherModal] = useState(false);
-  const [assignTeacherClass, setAssignTeacherClass] = useState<{id: string, name: string} | null>(null);
+  const [assignTeacherClass, setAssignTeacherClass] = useState<{ id: string, name: string } | null>(null);
   const [teachers, setTeachers] = useState<Teacher[]>([]);
   const [teacherSearch, setTeacherSearch] = useState('');
   const [selectedTeacherId, setSelectedTeacherId] = useState<string | null>(null);
@@ -161,9 +161,9 @@ export default function ClassesPage() {
 
       do {
         const response = await api.get<ApiResponse<StudentsResponse>>(
-          `/institution-admin/students?page=${currentPage}&standardName=${encodeURIComponent(standardName)}&sectionName=${encodeURIComponent(sectionName)}`
+          `/teacher/students?page=${currentPage}&standardName=${encodeURIComponent(standardName)}&sectionName=${encodeURIComponent(sectionName)}`
         );
-        
+
         if (response.data.success) {
           totalStudents += response.data.data.students.length;
           totalPages = response.data.data.pagination.totalPages;
@@ -183,10 +183,10 @@ export default function ClassesPage() {
   // Fetch student counts for all sections of a standard
   const fetchStudentCountsForStandard = useCallback(async (standard: Standard, standardSections: Section[]): Promise<number> => {
     try {
-      const studentCountPromises = standardSections.map(section => 
+      const studentCountPromises = standardSections.map(section =>
         fetchStudentsForSection(standard.name, section.name)
       );
-      
+
       const studentCounts = await Promise.all(studentCountPromises);
       return studentCounts.reduce((total, count) => total + count, 0);
     } catch (err) {
@@ -203,9 +203,9 @@ export default function ClassesPage() {
       let totalPages = 1;
 
       do {
-        const url = currentPage === 1 ? '/institution-admin/standards' : `/institution-admin/standards?page=${currentPage}`;
+        const url = currentPage === 1 ? '/teacher/standards' : `/teacher/standards?page=${currentPage}`;
         const response = await api.get<ApiResponse<StandardsResponse>>(url);
-        
+
         if (response.data.success) {
           allStandards = [...allStandards, ...response.data.data.standards];
           totalPages = response.data.data.pagination.totalPages;
@@ -217,7 +217,7 @@ export default function ClassesPage() {
 
       setStandards(allStandards);
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error && 'response' in err 
+      const errorMessage = err instanceof Error && 'response' in err
         ? (err as Error & { response?: { data?: { message?: string } } }).response?.data?.message || 'Failed to fetch classes'
         : 'Failed to fetch classes';
       setError(errorMessage);
@@ -232,9 +232,9 @@ export default function ClassesPage() {
       let totalPages = 1;
 
       do {
-        const url = currentPage === 1 ? '/institution-admin/sections' : `/institution-admin/sections?page=${currentPage}`;
+        const url = currentPage === 1 ? '/teacher/sections' : `/teacher/sections?page=${currentPage}`;
         const response = await api.get<ApiResponse<SectionsResponse>>(url);
-        
+
         if (response.data.success) {
           allSections = [...allSections, ...response.data.data.sections];
           totalPages = response.data.data.pagination.totalPages;
@@ -246,7 +246,7 @@ export default function ClassesPage() {
 
       setSections(allSections);
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error && 'response' in err 
+      const errorMessage = err instanceof Error && 'response' in err
         ? (err as Error & { response?: { data?: { message?: string } } }).response?.data?.message || 'Failed to fetch sections'
         : 'Failed to fetch sections';
       setError(errorMessage);
@@ -260,10 +260,10 @@ export default function ClassesPage() {
         standards.slice().reverse().map(async (standard) => {
           const standardSections = sections.filter(section => section.standardId === standard.id);
           const sectionNames = standardSections.map(section => section.name).join(', ');
-          
+
           // Get real student count for this standard
           const totalStudents = await fetchStudentCountsForStandard(standard, standardSections);
-          
+
           return {
             id: standard.id,
             grade: standard.name,
@@ -272,7 +272,7 @@ export default function ClassesPage() {
           };
         })
       );
-      
+
       setClasses(classesData);
     } catch (err) {
       console.error('Error transforming classes data:', err);
@@ -319,23 +319,23 @@ export default function ClassesPage() {
 
     try {
       // First, create the standard (class)
-      const standardResponse = await api.post<ApiResponse<{ standard: Standard }>>('/institution-admin/standards', {
+      const standardResponse = await api.post<ApiResponse<{ standard: Standard }>>('/teacher/standards', {
         name: newClassName.trim(),
       });
 
       if (standardResponse.data.success) {
         const newStandardId = standardResponse.data.data.standard.id;
-        
+
         // Create the selected sections
         const sectionPromises = selectedSections.map(sectionName =>
-          api.post<ApiResponse<{ section: Section }>>('/institution-admin/sections', {
+          api.post<ApiResponse<{ section: Section }>>('/teacher/sections', {
             name: sectionName,
             standardId: newStandardId,
           })
         );
 
         await Promise.all(sectionPromises);
-        
+
         const sectionsList = selectedSections.join(', ');
         setSuccess(`Class "${newClassName}" created successfully with sections ${sectionsList}!`);
         setNewClassName('');
@@ -345,7 +345,7 @@ export default function ClassesPage() {
         await Promise.all([fetchAllStandards(), fetchAllSections()]);
       }
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error && 'response' in err 
+      const errorMessage = err instanceof Error && 'response' in err
         ? (err as Error & { response?: { data?: { message?: string } } }).response?.data?.message || 'Failed to create class'
         : 'Failed to create class';
       setError(errorMessage);
@@ -401,7 +401,7 @@ export default function ClassesPage() {
     setSuccess('');
 
     try {
-      const response = await api.post<ApiResponse<{ section: Section }>>('/institution-admin/sections', {
+      const response = await api.post<ApiResponse<{ section: Section }>>('/teacher/sections', {
         name: newSectionName.trim(),
         standardId: sectionStandardId,
       });
@@ -425,13 +425,13 @@ export default function ClassesPage() {
   const fetchTeachers = useCallback(async (search = '') => {
     try {
       setLoadingTeachers(true);
-      let url = `/institution-admin/teachers?page=1&limit=50`; // Fetch first 50 for now, can implement infinite scroll later
+      let url = `/teacher/teachers?page=1&limit=50`; // Fetch first 50 for now, can implement infinite scroll later
       if (search.trim()) {
         url += `&search=${encodeURIComponent(search.trim())}`;
       }
-      
+
       const response = await api.get<ApiResponse<{ teachers: Teacher[] }>>(url); // Adjust response type if needed
-      
+
       if (response.data.success) {
         setTeachers(response.data.data.teachers);
       }
@@ -473,8 +473,8 @@ export default function ClassesPage() {
   };
 
   const toggleAssignSection = (sectionId: string) => {
-    setSelectedAssignSections(prev => 
-      prev.includes(sectionId) 
+    setSelectedAssignSections(prev =>
+      prev.includes(sectionId)
         ? prev.filter(s => s !== sectionId)
         : [...prev, sectionId]
     );
@@ -501,19 +501,19 @@ export default function ClassesPage() {
       };
 
       const response = await api.post(
-        `/institution-admin/teachers/${selectedTeacherId}/assign-sections`, 
+        `/teacher/teachers/${selectedTeacherId}/assign-sections`,
         payload
       );
 
       setSuccess(`Teacher assigned successfully to ${assignTeacherClass.name} sections!`);
-      
+
       // Close modal after short delay
       setTimeout(() => {
         closeAssignTeacherModal();
       }, 1500);
 
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error && 'response' in err 
+      const errorMessage = err instanceof Error && 'response' in err
         ? (err as Error & { response?: { data?: { message?: string } } }).response?.data?.message || 'Failed to assign teacher'
         : 'Failed to assign teacher';
       setError(errorMessage);
@@ -524,8 +524,8 @@ export default function ClassesPage() {
 
 
   const toggleSection = (section: string) => {
-    setSelectedSections(prev => 
-      prev.includes(section) 
+    setSelectedSections(prev =>
+      prev.includes(section)
         ? prev.filter(s => s !== section)
         : [...prev, section]
     );
@@ -561,7 +561,7 @@ export default function ClassesPage() {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-6 border-b border-gray-200">
             <h1 className="text-xl font-semibold text-gray-900">All Classes</h1>
             <div className="flex flex-col sm:flex-row gap-3">
-              <Button 
+              <Button
                 onClick={openModal}
                 className="button-primary px-4 py-2 rounded-lg flex items-center gap-2 shadow-sm"
               >
@@ -611,7 +611,7 @@ export default function ClassesPage() {
                     ✕
                   </button>
                 </div>
-                
+
                 <div className="space-y-8">
                   <div>
                     <label htmlFor="className" className="block text-sm font-bold text-gray-800 mb-4">
@@ -647,11 +647,10 @@ export default function ClassesPage() {
                           key={section}
                           type="button"
                           onClick={() => toggleSection(section)}
-                          className={`py-3 px-4 rounded-2xl border-2 font-bold transition-all duration-300 transform hover:scale-105 ${
-                            selectedSections.includes(section)
+                          className={`py-3 px-4 rounded-2xl border-2 font-bold transition-all duration-300 transform hover:scale-105 ${selectedSections.includes(section)
                               ? 'bg-gradient-to-r from-[color:var(--primary-500)] to-[color:var(--primary-600)] text-[color:var(--primary-foreground)] border-[color:var(--primary-400)] shadow-lg scale-105'
                               : 'bg-white/80 backdrop-blur-sm text-gray-700 border-gray-200 hover:border-[color:var(--primary-300)] hover:bg-[color:var(--primary-50)] shadow-md'
-                          }`}
+                            }`}
                         >
                           {section}
                         </button>
@@ -662,7 +661,7 @@ export default function ClassesPage() {
                     </p>
                   </div>
                 </div>
-                
+
                 <div className="flex space-x-4 mt-8">
                   <button
                     type="button"
@@ -682,7 +681,7 @@ export default function ClassesPage() {
                       </>
                     )}
                   </button>
-                  
+
                   <button
                     type="button"
                     onClick={closeModal}
@@ -798,22 +797,21 @@ export default function ClassesPage() {
                         className="pl-10 w-full border-gray-300 rounded-xl"
                       />
                     </div>
-                    
+
                     <div className="border rounded-xl overflow-hidden max-h-48 overflow-y-auto bg-white shadow-inner">
                       {loadingTeachers ? (
-                         <div className="p-4 text-center text-gray-500">Loading teachers...</div>
+                        <div className="p-4 text-center text-gray-500">Loading teachers...</div>
                       ) : teachers.length === 0 ? (
                         <div className="p-4 text-center text-gray-500">No teachers found.</div>
                       ) : (
                         teachers.map(teacher => (
-                          <div 
+                          <div
                             key={teacher.id}
                             onClick={() => setSelectedTeacherId(teacher.id)}
-                            className={`p-3 cursor-pointer flex items-center justify-between transition-colors ${
-                              selectedTeacherId === teacher.id 
-                                ? 'bg-[color:var(--primary-50)] border-l-4 border-[color:var(--primary-500)]' 
+                            className={`p-3 cursor-pointer flex items-center justify-between transition-colors ${selectedTeacherId === teacher.id
+                                ? 'bg-[color:var(--primary-50)] border-l-4 border-[color:var(--primary-500)]'
                                 : 'hover:bg-gray-50 border-l-4 border-transparent'
-                            }`}
+                              }`}
                           >
                             <div>
                               <p className="font-medium text-gray-800">{teacher.firstName} {teacher.lastName}</p>
@@ -841,11 +839,10 @@ export default function ClassesPage() {
                             key={section.id}
                             type="button"
                             onClick={() => toggleAssignSection(section.id)}
-                            className={`py-3 px-4 rounded-xl border-2 font-bold transition-all duration-200 text-left flex items-center justify-between ${
-                              selectedAssignSections.includes(section.id)
+                            className={`py-3 px-4 rounded-xl border-2 font-bold transition-all duration-200 text-left flex items-center justify-between ${selectedAssignSections.includes(section.id)
                                 ? 'bg-[color:var(--primary-50)] border-[color:var(--primary-500)] text-[color:var(--primary-800)]'
                                 : 'bg-white text-gray-700 border-gray-200 hover:border-gray-300'
-                            }`}
+                              }`}
                           >
                             Section {section.name}
                             {selectedAssignSections.includes(section.id) && (
@@ -880,7 +877,7 @@ export default function ClassesPage() {
                       </>
                     )}
                   </button>
-                  
+
                   <button
                     type="button"
                     onClick={closeAssignTeacherModal}
@@ -921,17 +918,16 @@ export default function ClassesPage() {
                     filteredClasses.map((row, index) => (
                       <tr
                         key={row.id}
-                        className={`border-b border-[color:var(--primary-100)] transition-colors hover:bg-[color:var(--primary-100)] ${
-                          index % 2 === 0 ? "bg-white" : "bg-[var(--primary-50)]"
-                        }`}
+                        className={`border-b border-[color:var(--primary-100)] transition-colors hover:bg-[color:var(--primary-100)] ${index % 2 === 0 ? "bg-white" : "bg-[var(--primary-50)]"
+                          }`}
                       >
                         <td className="py-4 px-6 text-[color:var(--primary-800)] font-medium">{row.grade}</td>
                         <td className="py-4 px-6 text-[color:var(--primary-700)]">{row.totalStudents}</td>
                         <td className="py-4 px-6 text-[color:var(--primary-700)]">{row.sections}</td>
                         <td className="py-4 px-6">
                           <div className="flex flex-wrap gap-2">
-                            <Button 
-                              size="sm" 
+                            <Button
+                              size="sm"
                               onClick={() => handleViewClass(row.id)}
                               className="button-primary px-4 py-2 rounded-lg shadow-sm"
                             >

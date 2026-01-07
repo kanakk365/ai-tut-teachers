@@ -55,7 +55,7 @@ export default function CreateProjectPage() {
   const [success, setSuccess] = useState('')
   const [standards, setStandards] = useState<Standard[]>([])
   const [loadingStandards, setLoadingStandards] = useState(true)
-  
+
   const [formData, setFormData] = useState<ProjectFormData>({
     title: '',
     class: '',
@@ -73,8 +73,8 @@ export default function CreateProjectPage() {
         let totalPages = 1
 
         // Fetch first page to get total pages
-        const firstResponse = await api.get<ApiResponse<StandardsResponse>>(`/institution-admin/standards?page=1`)
-        
+        const firstResponse = await api.get<ApiResponse<StandardsResponse>>(`/teacher/standards?page=1`)
+
         if (firstResponse.data.success) {
           allStandards = [...firstResponse.data.data.standards]
           totalPages = firstResponse.data.data.pagination.totalPages
@@ -83,7 +83,7 @@ export default function CreateProjectPage() {
           if (totalPages > 1) {
             const promises = []
             for (let page = 2; page <= totalPages; page++) {
-              promises.push(api.get<ApiResponse<StandardsResponse>>(`/institution-admin/standards?page=${page}`))
+              promises.push(api.get<ApiResponse<StandardsResponse>>(`/teacher/standards?page=${page}`))
             }
 
             const responses = await Promise.all(promises)
@@ -115,7 +115,7 @@ export default function CreateProjectPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!formData.title.trim() || !formData.class.trim() || !formData.subject.trim()) {
       setError('Title, Grade, and Subject are required')
       return
@@ -124,16 +124,16 @@ export default function CreateProjectPage() {
     try {
       setLoading(true)
       setError('')
-      
+
       // Prepare the data with standardId instead of class name
       const submitData = {
         ...formData,
         standardId: formData.class, // Use the selected standard ID
         class: standards.find(s => s.id === formData.class)?.name || formData.class // Send the name for API compatibility
       }
-      
+
       const response = await api.post('/teacher/project', submitData)
-      
+
       if (response.data.success) {
         setSuccess('Project created successfully!')
         setTimeout(() => {
@@ -143,7 +143,7 @@ export default function CreateProjectPage() {
         setError(response.data.message || 'Failed to create project')
       }
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error && 'response' in err 
+      const errorMessage = err instanceof Error && 'response' in err
         ? (err as Error & { response?: { data?: { message?: string } } }).response?.data?.message || 'Failed to create project'
         : 'Failed to create project';
       setError(errorMessage)
@@ -156,9 +156,9 @@ export default function CreateProjectPage() {
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="max-w-6xl mx-auto">
         <div className="mb-8">
-          <button 
-            type="button" 
-            onClick={() => router.back()} 
+          <button
+            type="button"
+            onClick={() => router.back()}
             className="text-[color:var(--primary-700)] hover:text-[color:var(--primary-800)] mb-4"
           >
             ← Back
@@ -285,7 +285,7 @@ export default function CreateProjectPage() {
                 <div className="space-y-1">
                   <span className="font-medium text-[color:var(--primary-700)]">Class:</span>
                   <p className="text-[color:var(--primary-800)]">
-                    {formData.class 
+                    {formData.class
                       ? standards.find(s => s.id === formData.class)?.name || 'Selected Grade'
                       : 'Not selected'
                     }
@@ -309,15 +309,15 @@ export default function CreateProjectPage() {
             </div>
 
             <div className="flex justify-end gap-6 pt-12">
-              <Button 
+              <Button
                 type="button"
-                variant="outline" 
+                variant="outline"
                 onClick={() => router.back()}
                 className="border-red-500 text-red-500 hover:bg-red-50 bg-white px-10 py-3 h-12 rounded-lg font-medium"
               >
                 Cancel
               </Button>
-              <Button 
+              <Button
                 type="submit"
                 disabled={loading}
                 className="button-primary px-10 py-3 h-12 rounded-lg font-medium disabled:opacity-50 shadow-sm"

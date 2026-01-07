@@ -112,7 +112,7 @@ export default function ClassDetailsPage() {
 
         // Fetch class statistics
         const statsResponse = await api.get<ApiResponse<{ stats: ClassStatistics[] }>>(
-          `/institution-admin/class-statistics/${standardId}`
+          `/teacher/class-statistics/${standardId}`
         )
 
         if (statsResponse.data.success && statsResponse.data.data.stats.length > 0) {

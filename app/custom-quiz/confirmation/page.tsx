@@ -83,17 +83,17 @@ export default function CustomQuizConfirmationPage() {
     const students = sessionStorage.getItem('customQuizSelectedStudents')
     const gradeSection = sessionStorage.getItem('customQuizGradeAndSection')
     const formData = sessionStorage.getItem('quizFormData')
-    
+
     console.log('Students from storage:', students) // Debug log
     console.log('Grade section from storage:', gradeSection) // Debug log
     console.log('Form data from storage:', formData) // Debug log
-    
+
     if (students) {
       const parsedStudents = JSON.parse(students)
       console.log('Parsed students:', parsedStudents) // Debug log
       setSelectedStudents(parsedStudents.selectedStudents || [])
     }
-    
+
     if (gradeSection) {
       setGradeAndSection(JSON.parse(gradeSection))
     }
@@ -142,22 +142,22 @@ export default function CustomQuizConfirmationPage() {
         description: "",
         questions: Array.isArray(quizFormData.questions)
           ? quizFormData.questions.map((question) => ({
-              questionText: question.questionText,
-              bloomTaxanomy: question.bloomTaxonomy,
-              options: Array.isArray(question.options)
-                ? question.options.map((option) => ({
-                    optionText: option.optionText,
-                    isCorrect: option.isCorrect,
-                  }))
-                : [],
-            }))
+            questionText: question.questionText,
+            bloomTaxanomy: question.bloomTaxonomy,
+            options: Array.isArray(question.options)
+              ? question.options.map((option) => ({
+                optionText: option.optionText,
+                isCorrect: option.isCorrect,
+              }))
+              : [],
+          }))
           : [],
       }
 
       console.log('Sanitized quiz payload:', sanitizedQuizPayload)
 
       // Create the quiz first
-      const createResponse = await api.post('/institution-admin/custom-quizzes/create', sanitizedQuizPayload)
+      const createResponse = await api.post('/teacher/custom-quizzes/create', sanitizedQuizPayload)
 
       if (!createResponse.data.success) {
         setError(createResponse.data.message || 'Failed to create quiz')
@@ -176,7 +176,7 @@ export default function CustomQuizConfirmationPage() {
 
       console.log('Assigning quiz with data:', assignmentData)
 
-      const assignResponse = await api.post('/institution-admin/custom-quizzes/assign', assignmentData)
+      const assignResponse = await api.post('/teacher/custom-quizzes/assign', assignmentData)
 
       if (assignResponse.data.success) {
         setSuccess(`Quiz created and assigned successfully to ${assignResponse.data.data.assignedStudentsCount || selectedStudents.length} students`)
@@ -228,9 +228,9 @@ export default function CustomQuizConfirmationPage() {
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="max-w-6xl mx-auto">
         <div className="mb-8">
-          <button 
-            type="button" 
-            onClick={handleEdit} 
+          <button
+            type="button"
+            onClick={handleEdit}
             className="text-gray-600 hover:text-gray-800 mb-4"
           >
             ← Back to Edit

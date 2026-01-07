@@ -72,12 +72,12 @@ export function StudentList({ grade, section, sectionId, onAssignExam, onBack, o
 
       while (hasMorePages) {
         const response = await api.get<StudentsResponse>(
-          `/institution-admin/students?page=${currentPage}&limit=10&standardName=${stdName}&sectionName=${secName}`
+          `/teacher/students?page=${currentPage}&limit=10&standardName=${stdName}&sectionName=${secName}`
         );
-        
+
         if (response.data.success) {
           allStudents = [...allStudents, ...response.data.data.students];
-          
+
           // Check if there are more pages
           if (currentPage >= response.data.data.pagination.totalPages) {
             hasMorePages = false;
@@ -111,12 +111,12 @@ export function StudentList({ grade, section, sectionId, onAssignExam, onBack, o
   }, [grade, section, sectionId, fetchAllStudents]);
 
   const handleStudentSelection = (studentId: string) => {
-    const newSelection = selectedStudents.includes(studentId) 
+    const newSelection = selectedStudents.includes(studentId)
       ? selectedStudents.filter(id => id !== studentId)
       : [...selectedStudents, studentId];
-    
+
     setSelectedStudents(newSelection);
-    
+
     // If we have an external callback for exam assignment, convert string IDs to numbers and call it
     if (onStudentsSelect) {
       const numericIds = newSelection.map(id => parseInt(id)).filter(id => !Number.isNaN(id));
@@ -127,7 +127,7 @@ export function StudentList({ grade, section, sectionId, onAssignExam, onBack, o
   const handleAssignToAll = () => {
     const newSelection = selectedStudents.length === students.length ? [] : students.map(s => s.id);
     setSelectedStudents(newSelection);
-    
+
     // If we have an external callback for exam assignment, convert string IDs to numbers and call it
     if (onStudentsSelect) {
       const numericIds = newSelection.map(id => parseInt(id)).filter(id => !Number.isNaN(id));
@@ -252,11 +252,10 @@ export function StudentList({ grade, section, sectionId, onAssignExam, onBack, o
                         <button
                           type="button"
                           onClick={() => handleStudentSelection(student.id)}
-                          className={`px-3 py-2 rounded-md text-sm font-medium shadow-sm focus:outline-none transition ${
-                            selectedStudents.includes(student.id)
+                          className={`px-3 py-2 rounded-md text-sm font-medium shadow-sm focus:outline-none transition ${selectedStudents.includes(student.id)
                               ? 'button-primary'
                               : 'bg-[var(--primary-50)] text-[color:var(--primary-700)] border border-[color:var(--primary-200)] hover:bg-[var(--primary-100)]'
-                          }`}
+                            }`}
                         >
                           {selectedStudents.includes(student.id) ? 'Selected' : 'Select'}
                         </button>

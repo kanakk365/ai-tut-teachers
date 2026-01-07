@@ -62,7 +62,7 @@ export default function CustomQuizStudentsPage() {
       const data = JSON.parse(customQuizGradeAndSection);
       const stdName = data.standardName;
       const secName = data.sectionName;
-      
+
       if (stdName && secName) {
         fetchAllStudents(stdName, secName);
       } else {
@@ -84,12 +84,12 @@ export default function CustomQuizStudentsPage() {
 
       while (hasMorePages) {
         const response = await api.get<StudentsResponse>(
-          `/institution-admin/students?page=${currentPage}&limit=10&standardName=${stdName}&sectionName=${secName}`
+          `/teacher/students?page=${currentPage}&limit=10&standardName=${stdName}&sectionName=${secName}`
         );
-        
+
         if (response.data.success) {
           allStudents = [...allStudents, ...response.data.data.students];
-          
+
           // Check if there are more pages
           if (currentPage >= response.data.data.pagination.totalPages) {
             hasMorePages = false;
@@ -112,8 +112,8 @@ export default function CustomQuizStudentsPage() {
   };
 
   const handleStudentSelection = (studentId: string) => {
-    setSelectedStudents(prev => 
-      prev.includes(studentId) 
+    setSelectedStudents(prev =>
+      prev.includes(studentId)
         ? prev.filter(id => id !== studentId)
         : [...prev, studentId]
     );
@@ -141,7 +141,7 @@ export default function CustomQuizStudentsPage() {
     const customQuizGradeAndSection = sessionStorage.getItem('customQuizGradeAndSection');
     if (customQuizGradeAndSection) {
       const data = JSON.parse(customQuizGradeAndSection);
-      
+
       // Store selected students and proceed to quiz creation
       const selectionData = {
         standardName: data.standardName,
@@ -195,7 +195,7 @@ export default function CustomQuizStudentsPage() {
   return (
     <div className="pt-8 px-6 lg:px-16">
       <div className="max-w-[1100px] mx-auto">
-  <div className="bg-white rounded-2xl border border-[color:var(--primary-100)] shadow-sm p-8">
+        <div className="bg-white rounded-2xl border border-[color:var(--primary-100)] shadow-sm p-8">
           <div className="flex items-start justify-between mb-6">
             <div>
               <h1 className="text-2xl font-semibold text-[color:var(--primary-800)]">Students</h1>

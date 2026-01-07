@@ -62,7 +62,7 @@ export default function CustomExamStudentsPage() {
       const data = JSON.parse(customExamGradeAndSection);
       const stdName = data.standardName;
       const secName = data.sectionName;
-      
+
       if (stdName && secName) {
         fetchAllStudents(stdName, secName);
       } else {
@@ -84,12 +84,12 @@ export default function CustomExamStudentsPage() {
 
       while (hasMorePages) {
         const response = await api.get<StudentsResponse>(
-          `/institution-admin/students?page=${currentPage}&limit=10&standardName=${stdName}&sectionName=${secName}`
+          `/teacher/students?page=${currentPage}&limit=10&standardName=${stdName}&sectionName=${secName}`
         );
-        
+
         if (response.data.success) {
           allStudents = [...allStudents, ...response.data.data.students];
-          
+
           // Check if there are more pages
           if (currentPage >= response.data.data.pagination.totalPages) {
             hasMorePages = false;
@@ -112,8 +112,8 @@ export default function CustomExamStudentsPage() {
   };
 
   const handleStudentSelection = (studentId: string) => {
-    setSelectedStudents(prev => 
-      prev.includes(studentId) 
+    setSelectedStudents(prev =>
+      prev.includes(studentId)
         ? prev.filter(id => id !== studentId)
         : [...prev, studentId]
     );
@@ -141,7 +141,7 @@ export default function CustomExamStudentsPage() {
     const customExamGradeAndSection = sessionStorage.getItem('customExamGradeAndSection');
     if (customExamGradeAndSection) {
       const data = JSON.parse(customExamGradeAndSection);
-      
+
       // Store selected students and proceed to exam creation
       const selectionData = {
         standardName: data.standardName,

@@ -75,7 +75,7 @@ const shouldForceLogout = (error: ResponseError): boolean => {
     "/auth/login",
     "/auth/profile",
     "/auth/refresh",
-    "/institution-admin/dashboard",
+    "/teacher/dashboard",
   ];
 
   const messageIndicatesTokenIssue = criticalMessageKeywords.some((keyword) =>

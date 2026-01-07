@@ -8,7 +8,6 @@ import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
-  LayoutDashboard,
   Users,
   FlaskConical,
   FileQuestion,
@@ -86,7 +85,6 @@ export function useSidebar() {
 }
 
 const navigationItems = [
-  { icon: LayoutDashboard, label: "Dashboard", href: "/" },
   { icon: GraduationCap, label: "Class", href: "/classes" },
   { icon: Users, label: "Students", href: "/students" },
   { icon: User, label: "Teachers", href: "/teachers" },
@@ -202,14 +200,14 @@ export function Sidebar({ className, collapsed: externalCollapsed, setCollapsed:
     if (href === '/logout') {
       console.log('=== LOGOUT BUTTON CLICKED ===');
       console.log('About to call logout function...');
-      
+
       try {
         logout();
         console.log('Logout function completed successfully');
-        
+
         console.log('Navigating to login page...');
         router.push('/login');
-        
+
         // Force a page reload to ensure all state is cleared
         setTimeout(() => {
           console.log('Force redirecting to login page...');
@@ -218,7 +216,7 @@ export function Sidebar({ className, collapsed: externalCollapsed, setCollapsed:
       } catch (error) {
         console.error('Error during logout:', error);
       }
-      
+
       return;
     }
     router.push(href)
@@ -323,366 +321,366 @@ export function Sidebar({ className, collapsed: externalCollapsed, setCollapsed:
           </Button>
         </div>
 
-      <nav className="flex-1 p-4 space-y-1 overflow-y-auto scrollbar-hide">
-        {navigationItems.map((item) => {
-          const isActive = pathname === item.href ||
-            (item.label === "Students" && pathname.startsWith("/students")) ||
-            (item.label === "Teachers" && pathname.startsWith("/teachers")) ||
-            (item.label === "Quizzes" && pathname.startsWith("/quizzes")) ||
-            (item.label === "Project Lab" && pathname.startsWith("/projects")) ||
-            (item.label === "Exams" && pathname.startsWith("/exams")) ||
-            (item.label === "Custom Exam" && pathname.startsWith("/custom-exam")) ||
-            (item.label === "Custom Quiz" && pathname.startsWith("/custom-quiz")) ||
-            (item.label === "Profile" && pathname.startsWith("/profile"))
+        <nav className="flex-1 p-4 space-y-1 overflow-y-auto scrollbar-hide">
+          {navigationItems.map((item) => {
+            const isActive = pathname === item.href ||
+              (item.label === "Students" && pathname.startsWith("/students")) ||
+              (item.label === "Teachers" && pathname.startsWith("/teachers")) ||
+              (item.label === "Quizzes" && pathname.startsWith("/quizzes")) ||
+              (item.label === "Project Lab" && pathname.startsWith("/projects")) ||
+              (item.label === "Exams" && pathname.startsWith("/exams")) ||
+              (item.label === "Custom Exam" && pathname.startsWith("/custom-exam")) ||
+              (item.label === "Custom Quiz" && pathname.startsWith("/custom-quiz")) ||
+              (item.label === "Profile" && pathname.startsWith("/profile"))
 
-          // Function to close all sub-menus
-          const closeAllSubMenus = () => {
-            setIsQuizzesExpanded(false);
-            setIsProjectsExpanded(false);
-            setIsExamsExpanded(false);
-            setIsCustomExamsExpanded(false);
-            setIsCustomQuizzesExpanded(false);
-          }
+            // Function to close all sub-menus
+            const closeAllSubMenus = () => {
+              setIsQuizzesExpanded(false);
+              setIsProjectsExpanded(false);
+              setIsExamsExpanded(false);
+              setIsCustomExamsExpanded(false);
+              setIsCustomQuizzesExpanded(false);
+            }
 
-          return (
-            <div key={item.label}>
-              {item.label === "Quizzes" ? (
-                <Link
-                  href={item.href}
-                  className={cn(
-                    "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors text-left",
-                    isActive
-                      ? "bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)] text-[color:var(--primary-foreground)]"
-                      : "text-gray-700 hover:bg-gray-100",
-                    isCollapsed && "justify-center gap-0 px-0",
-                  )}
-                  onClick={() => {
-                    closeAllSubMenus();
-                    setIsQuizzesExpanded(true);
-                    setIsMobileOpen(false);
-                  }}
-                >
-                  <item.icon className={navIconClassName} />
-                  {!isCollapsed && item.label}
-                </Link>
-              ) : item.label === "Project Lab" ? (
-                <Link
-                  href={item.href}
-                  className={cn(
-                    "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors text-left",
-                    isActive
-                      ? "bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)] text-[color:var(--primary-foreground)]"
-                      : "text-gray-700 hover:bg-gray-100",
-                    isCollapsed && "justify-center gap-0 px-0",
-                  )}
-                  onClick={() => {
-                    closeAllSubMenus();
-                    setIsProjectsExpanded(true);
-                    setIsMobileOpen(false);
-                  }}
-                >
-                  <item.icon className={navIconClassName} />
-                  {!isCollapsed && item.label}
-                </Link>
-              ) : item.label === "Exams" ? (
-                <Link
-                  href={item.href}
-                  className={cn(
-                    "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors text-left",
-                    isActive
-                      ? "bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)] text-[color:var(--primary-foreground)]"
-                      : "text-gray-700 hover:bg-gray-100",
-                    isCollapsed && "justify-center gap-0 px-0",
-                  )}
-                  onClick={() => {
-                    closeAllSubMenus();
-                    setIsExamsExpanded(true);
-                    setIsMobileOpen(false);
-                  }}
-                >
-                  <item.icon className={navIconClassName} />
-                  {!isCollapsed && item.label}
-                </Link>
-              ) : item.label === "Custom Exam" ? (
-                <Link
-                  href={item.href}
-                  className={cn(
-                    "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors text-left",
-                    isActive
-                      ? "bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)] text-[color:var(--primary-foreground)]"
-                      : "text-gray-700 hover:bg-gray-100",
-                    isCollapsed && "justify-center gap-0 px-0",
-                  )}
-                  onClick={() => {
-                    closeAllSubMenus();
-                    setIsCustomExamsExpanded(true);
-                    setIsMobileOpen(false);
-                  }}
-                >
-                  <item.icon className={navIconClassName} />
-                  {!isCollapsed && item.label}
-                </Link>
-              ) : item.label === "Custom Quiz" ? (
-                <Link
-                  href={item.href}
-                  className={cn(
-                    "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors text-left",
-                    isActive
-                      ? "bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)] text-[color:var(--primary-foreground)]"
-                      : "text-gray-700 hover:bg-gray-100",
-                    isCollapsed && "justify-center gap-0 px-0",
-                  )}
-                  onClick={() => {
-                    closeAllSubMenus();
-                    setIsCustomQuizzesExpanded(true);
-                    setIsMobileOpen(false);
-                  }}
-                >
-                  <item.icon className={navIconClassName} />
-                  {!isCollapsed && item.label}
-                </Link>
-              ) : (
-                <Link
-                  href={item.href}
-                  className={cn(
-                    "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
-                    isActive
-                      ? "bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)] text-[color:var(--primary-foreground)]"
-                      : "text-gray-700 hover:bg-gray-100",
-                    isCollapsed && "justify-center gap-0 px-0",
-                  )}
-                  onClick={() => {
-                    // Close all sub-menus when clicking on non-expandable items
-                    closeAllSubMenus();
-                    setIsMobileOpen(false);
-                  }}
-                >
-                  <item.icon className={navIconClassName} />
-                  {!isCollapsed && item.label}
-                </Link>
-              )}
+            return (
+              <div key={item.label}>
+                {item.label === "Quizzes" ? (
+                  <Link
+                    href={item.href}
+                    className={cn(
+                      "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors text-left",
+                      isActive
+                        ? "bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)] text-[color:var(--primary-foreground)]"
+                        : "text-gray-700 hover:bg-gray-100",
+                      isCollapsed && "justify-center gap-0 px-0",
+                    )}
+                    onClick={() => {
+                      closeAllSubMenus();
+                      setIsQuizzesExpanded(true);
+                      setIsMobileOpen(false);
+                    }}
+                  >
+                    <item.icon className={navIconClassName} />
+                    {!isCollapsed && item.label}
+                  </Link>
+                ) : item.label === "Project Lab" ? (
+                  <Link
+                    href={item.href}
+                    className={cn(
+                      "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors text-left",
+                      isActive
+                        ? "bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)] text-[color:var(--primary-foreground)]"
+                        : "text-gray-700 hover:bg-gray-100",
+                      isCollapsed && "justify-center gap-0 px-0",
+                    )}
+                    onClick={() => {
+                      closeAllSubMenus();
+                      setIsProjectsExpanded(true);
+                      setIsMobileOpen(false);
+                    }}
+                  >
+                    <item.icon className={navIconClassName} />
+                    {!isCollapsed && item.label}
+                  </Link>
+                ) : item.label === "Exams" ? (
+                  <Link
+                    href={item.href}
+                    className={cn(
+                      "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors text-left",
+                      isActive
+                        ? "bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)] text-[color:var(--primary-foreground)]"
+                        : "text-gray-700 hover:bg-gray-100",
+                      isCollapsed && "justify-center gap-0 px-0",
+                    )}
+                    onClick={() => {
+                      closeAllSubMenus();
+                      setIsExamsExpanded(true);
+                      setIsMobileOpen(false);
+                    }}
+                  >
+                    <item.icon className={navIconClassName} />
+                    {!isCollapsed && item.label}
+                  </Link>
+                ) : item.label === "Custom Exam" ? (
+                  <Link
+                    href={item.href}
+                    className={cn(
+                      "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors text-left",
+                      isActive
+                        ? "bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)] text-[color:var(--primary-foreground)]"
+                        : "text-gray-700 hover:bg-gray-100",
+                      isCollapsed && "justify-center gap-0 px-0",
+                    )}
+                    onClick={() => {
+                      closeAllSubMenus();
+                      setIsCustomExamsExpanded(true);
+                      setIsMobileOpen(false);
+                    }}
+                  >
+                    <item.icon className={navIconClassName} />
+                    {!isCollapsed && item.label}
+                  </Link>
+                ) : item.label === "Custom Quiz" ? (
+                  <Link
+                    href={item.href}
+                    className={cn(
+                      "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors text-left",
+                      isActive
+                        ? "bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)] text-[color:var(--primary-foreground)]"
+                        : "text-gray-700 hover:bg-gray-100",
+                      isCollapsed && "justify-center gap-0 px-0",
+                    )}
+                    onClick={() => {
+                      closeAllSubMenus();
+                      setIsCustomQuizzesExpanded(true);
+                      setIsMobileOpen(false);
+                    }}
+                  >
+                    <item.icon className={navIconClassName} />
+                    {!isCollapsed && item.label}
+                  </Link>
+                ) : (
+                  <Link
+                    href={item.href}
+                    className={cn(
+                      "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+                      isActive
+                        ? "bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)] text-[color:var(--primary-foreground)]"
+                        : "text-gray-700 hover:bg-gray-100",
+                      isCollapsed && "justify-center gap-0 px-0",
+                    )}
+                    onClick={() => {
+                      // Close all sub-menus when clicking on non-expandable items
+                      closeAllSubMenus();
+                      setIsMobileOpen(false);
+                    }}
+                  >
+                    <item.icon className={navIconClassName} />
+                    {!isCollapsed && item.label}
+                  </Link>
+                )}
 
-              {/* Quiz Sub-navigation */}
-              {item.label === "Quizzes" && isQuizzesExpanded && !isCollapsed && (
-                <div className="ml-4 mt-1 space-y-1">
-                  {quizSubNavigation.map((subItem) => (
-                    <Link
-                      key={subItem.name}
-                      href={subItem.href}
-                      className={cn(
-                        "flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors",
-                        (() => {
-                          // Special logic for quiz sub-navigation
-                          if (item.label === "Quizzes") {
-                            if (subItem.name === "View Quiz") {
-                              // View Quiz: gray when not exactly on /quizzes
-                              return pathname !== "/quizzes" && "text-gray-600 hover:bg-gray-50";
-                            } else if (subItem.name === "Create Quiz") {
-                              // Create Quiz: gray when not on quiz-related paths (except main /quizzes)
-                              return !(pathname !== "/quizzes" && pathname.startsWith("/quizzes")) && "text-gray-600 hover:bg-gray-50";
+                {/* Quiz Sub-navigation */}
+                {item.label === "Quizzes" && isQuizzesExpanded && !isCollapsed && (
+                  <div className="ml-4 mt-1 space-y-1">
+                    {quizSubNavigation.map((subItem) => (
+                      <Link
+                        key={subItem.name}
+                        href={subItem.href}
+                        className={cn(
+                          "flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors",
+                          (() => {
+                            // Special logic for quiz sub-navigation
+                            if (item.label === "Quizzes") {
+                              if (subItem.name === "View Quiz") {
+                                // View Quiz: gray when not exactly on /quizzes
+                                return pathname !== "/quizzes" && "text-gray-600 hover:bg-gray-50";
+                              } else if (subItem.name === "Create Quiz") {
+                                // Create Quiz: gray when not on quiz-related paths (except main /quizzes)
+                                return !(pathname !== "/quizzes" && pathname.startsWith("/quizzes")) && "text-gray-600 hover:bg-gray-50";
+                              }
                             }
-                          }
-                          // Default logic for other sub-navigations
-                          return pathname !== subItem.href && !pathname.startsWith(subItem.href) && "text-gray-600 hover:bg-gray-50";
-                        })(),
-                      )}
-                      style={
-                        (() => {
-                          // Special logic for quiz sub-navigation
-                          if (item.label === "Quizzes") {
-                            if (subItem.name === "View Quiz") {
-                              // View Quiz: highlighted only when exactly on /quizzes (main quiz list)
-                              return pathname === "/quizzes"
-                                ? {
+                            // Default logic for other sub-navigations
+                            return pathname !== subItem.href && !pathname.startsWith(subItem.href) && "text-gray-600 hover:bg-gray-50";
+                          })(),
+                        )}
+                        style={
+                          (() => {
+                            // Special logic for quiz sub-navigation
+                            if (item.label === "Quizzes") {
+                              if (subItem.name === "View Quiz") {
+                                // View Quiz: highlighted only when exactly on /quizzes (main quiz list)
+                                return pathname === "/quizzes"
+                                  ? {
                                     backgroundColor: "linear-gradient(135deg, color-mix(in oklch, var(--primary) 15%, white 85%) 0%, color-mix(in oklch, var(--secondary) 15%, white 85%) 100%)",
                                     color: "color-mix(in oklch, var(--primary-foreground) 80%, var(--muted-foreground) 20%)",
                                   }
-                                : undefined;
-                            } else if (subItem.name === "Create Quiz") {
-                              // Create Quiz: highlighted when on any quiz-related path except the main /quizzes page
-                              return pathname !== "/quizzes" && pathname.startsWith("/quizzes")
-                                ? {
+                                  : undefined;
+                              } else if (subItem.name === "Create Quiz") {
+                                // Create Quiz: highlighted when on any quiz-related path except the main /quizzes page
+                                return pathname !== "/quizzes" && pathname.startsWith("/quizzes")
+                                  ? {
                                     backgroundColor: "linear-gradient(135deg, color-mix(in oklch, var(--primary) 15%, white 85%) 0%, color-mix(in oklch, var(--secondary) 15%, white 85%) 100%)",
                                     color: "color-mix(in oklch, var(--primary-foreground) 80%, var(--muted-foreground) 20%)",
                                   }
-                                : undefined;
+                                  : undefined;
+                              }
                             }
-                          }
-                          // Default logic for other sub-navigations
-                          return pathname === subItem.href || pathname.startsWith(subItem.href)
-                            ? {
+                            // Default logic for other sub-navigations
+                            return pathname === subItem.href || pathname.startsWith(subItem.href)
+                              ? {
                                 backgroundColor: "linear-gradient(135deg, color-mix(in oklch, var(--primary) 15%, white 85%) 0%, color-mix(in oklch, var(--secondary) 15%, white 85%) 100%)",
                                 color: "color-mix(in oklch, var(--primary-foreground) 80%, var(--muted-foreground) 20%)",
                               }
-                            : undefined;
-                        })()
-                      }
-                    >
-                      <subItem.icon className="w-4 h-4" />
-                      {subItem.name}
-                    </Link>
-                  ))}
-                </div>
-              )}
+                              : undefined;
+                          })()
+                        }
+                      >
+                        <subItem.icon className="w-4 h-4" />
+                        {subItem.name}
+                      </Link>
+                    ))}
+                  </div>
+                )}
 
-              {/* Project Sub-navigation */}
-              {item.label === "Project Lab" && isProjectsExpanded && !isCollapsed && (
-                <div className="ml-4 mt-1 space-y-1">
-                  {projectSubNavigation.map((subItem) => (
-                    <Link
-                      key={subItem.name}
-                      href={subItem.href}
-                      className={cn(
-                        "flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors",
-                        pathname !== subItem.href && "text-gray-600 hover:bg-gray-50",
-                      )}
-                      style={
-                        pathname === subItem.href
-                          ? {
+                {/* Project Sub-navigation */}
+                {item.label === "Project Lab" && isProjectsExpanded && !isCollapsed && (
+                  <div className="ml-4 mt-1 space-y-1">
+                    {projectSubNavigation.map((subItem) => (
+                      <Link
+                        key={subItem.name}
+                        href={subItem.href}
+                        className={cn(
+                          "flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors",
+                          pathname !== subItem.href && "text-gray-600 hover:bg-gray-50",
+                        )}
+                        style={
+                          pathname === subItem.href
+                            ? {
                               backgroundColor: "linear-gradient(135deg, color-mix(in oklch, var(--primary) 15%, white 85%) 0%, color-mix(in oklch, var(--secondary) 15%, white 85%) 100%)",
                               color: "color-mix(in oklch, var(--primary-foreground) 80%, var(--muted-foreground) 20%)",
                             }
-                          : undefined
-                      }
-                    >
-                      <subItem.icon className="w-4 h-4" />
-                      {subItem.name}
-                    </Link>
-                  ))}
-                </div>
-              )}
-
-              {/* Exam Sub-navigation */}
-              {item.label === "Exams" && isExamsExpanded && !isCollapsed && (
-                <div className="ml-4 mt-1 space-y-1">
-                  {examSubNavigation.map((subItem) => {
-                    const isCreateExamActive = subItem.name === "Create Exam" &&
-                      (pathname === subItem.href ||
-                       pathname === "/exams/create/section" ||
-                       pathname === "/exams/create/students" ||
-                       pathname === "/exams/create/assign");
-
-                    return (
-                      <Link
-                        key={subItem.name}
-                        href={subItem.href}
-                        className={cn(
-                          "flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors",
-                          isCreateExamActive
-                            ? "bg-[linear-gradient(135deg, color-mix(in oklch, var(--primary) 15%, white 85%) 0%, color-mix(in oklch, var(--secondary) 15%, white 85%) 100%)] text-[color-mix(in oklch, var(--primary-foreground) 80%, var(--muted-foreground) 20%)]"
-                            : pathname !== subItem.href && "text-gray-600 hover:bg-gray-50",
-                        )}
-                        style={
-                          isCreateExamActive
-                            ? {
-                                backgroundColor: "linear-gradient(135deg, color-mix(in oklch, var(--primary) 15%, white 85%) 0%, color-mix(in oklch, var(--secondary) 15%, white 85%) 100%)",
-                                color: "color-mix(in oklch, var(--primary-foreground) 80%, var(--muted-foreground) 20%)",
-                              }
-                            : pathname === subItem.href
-                              ? {
-                                  backgroundColor: "linear-gradient(135deg, color-mix(in oklch, var(--primary) 15%, white 85%) 0%, color-mix(in oklch, var(--secondary) 15%, white 85%) 100%)",
-                                  color: "color-mix(in oklch, var(--primary-foreground) 80%, var(--muted-foreground) 20%)",
-                                }
-                              : undefined
+                            : undefined
                         }
                       >
                         <subItem.icon className="w-4 h-4" />
                         {subItem.name}
                       </Link>
-                    );
-                  })}
-                </div>
-              )}
+                    ))}
+                  </div>
+                )}
 
-              {/* Custom Exam Sub-navigation */}
-              {item.label === "Custom Exam" && isCustomExamsExpanded && !isCollapsed && (
-                <div className="ml-4 mt-1 space-y-1">
-                  {customExamSubNavigation.map((subItem) => {
-                    const isCreateCustomExamActive = subItem.name === "Create Custom Exam" &&
-                      (pathname === subItem.href ||
-                       pathname === "/custom-exam/section" ||
-                       pathname === "/custom-exam/students" ||
-                       pathname === "/custom-exam/form" ||
-                       pathname === "/custom-exam/assign");
+                {/* Exam Sub-navigation */}
+                {item.label === "Exams" && isExamsExpanded && !isCollapsed && (
+                  <div className="ml-4 mt-1 space-y-1">
+                    {examSubNavigation.map((subItem) => {
+                      const isCreateExamActive = subItem.name === "Create Exam" &&
+                        (pathname === subItem.href ||
+                          pathname === "/exams/create/section" ||
+                          pathname === "/exams/create/students" ||
+                          pathname === "/exams/create/assign");
 
-                    return (
-                      <Link
-                        key={subItem.name}
-                        href={subItem.href}
-                        className={cn(
-                          "flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors",
-                          isCreateCustomExamActive
-                            ? "bg-[linear-gradient(135deg, color-mix(in oklch, var(--primary) 15%, white 85%) 0%, color-mix(in oklch, var(--secondary) 15%, white 85%) 100%)] text-[color-mix(in oklch, var(--primary-foreground) 80%, var(--muted-foreground) 20%)]"
-                            : pathname !== subItem.href && "text-gray-600 hover:bg-gray-50",
-                        )}
-                        style={
-                          isCreateCustomExamActive
-                            ? {
+                      return (
+                        <Link
+                          key={subItem.name}
+                          href={subItem.href}
+                          className={cn(
+                            "flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors",
+                            isCreateExamActive
+                              ? "bg-[linear-gradient(135deg, color-mix(in oklch, var(--primary) 15%, white 85%) 0%, color-mix(in oklch, var(--secondary) 15%, white 85%) 100%)] text-[color-mix(in oklch, var(--primary-foreground) 80%, var(--muted-foreground) 20%)]"
+                              : pathname !== subItem.href && "text-gray-600 hover:bg-gray-50",
+                          )}
+                          style={
+                            isCreateExamActive
+                              ? {
                                 backgroundColor: "linear-gradient(135deg, color-mix(in oklch, var(--primary) 15%, white 85%) 0%, color-mix(in oklch, var(--secondary) 15%, white 85%) 100%)",
                                 color: "color-mix(in oklch, var(--primary-foreground) 80%, var(--muted-foreground) 20%)",
                               }
-                            : pathname === subItem.href
-                              ? {
+                              : pathname === subItem.href
+                                ? {
                                   backgroundColor: "linear-gradient(135deg, color-mix(in oklch, var(--primary) 15%, white 85%) 0%, color-mix(in oklch, var(--secondary) 15%, white 85%) 100%)",
                                   color: "color-mix(in oklch, var(--primary-foreground) 80%, var(--muted-foreground) 20%)",
                                 }
-                              : undefined
-                        }
-                      >
-                        <subItem.icon className="w-4 h-4" />
-                        {subItem.name}
-                      </Link>
-                    );
-                  })}
-                </div>
-              )}
+                                : undefined
+                          }
+                        >
+                          <subItem.icon className="w-4 h-4" />
+                          {subItem.name}
+                        </Link>
+                      );
+                    })}
+                  </div>
+                )}
 
-              {/* Custom Quiz Sub-navigation */}
-              {item.label === "Custom Quiz" && isCustomQuizzesExpanded && !isCollapsed && (
-                <div className="ml-4 mt-1 space-y-1">
-                  {customQuizSubNavigation.map((subItem) => {
-                    const isCreateCustomQuizActive = subItem.name === "Create Custom Quiz" &&
-                      (pathname === subItem.href ||
-                       pathname === "/custom-quiz/section" ||
-                       pathname === "/custom-quiz/students" ||
-                       pathname === "/custom-quiz/form" ||
-                       pathname === "/custom-quiz/assign");
+                {/* Custom Exam Sub-navigation */}
+                {item.label === "Custom Exam" && isCustomExamsExpanded && !isCollapsed && (
+                  <div className="ml-4 mt-1 space-y-1">
+                    {customExamSubNavigation.map((subItem) => {
+                      const isCreateCustomExamActive = subItem.name === "Create Custom Exam" &&
+                        (pathname === subItem.href ||
+                          pathname === "/custom-exam/section" ||
+                          pathname === "/custom-exam/students" ||
+                          pathname === "/custom-exam/form" ||
+                          pathname === "/custom-exam/assign");
 
-                    return (
-                      <Link
-                        key={subItem.name}
-                        href={subItem.href}
-                        className={cn(
-                          "flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors",
-                          isCreateCustomQuizActive
-                            ? "bg-[linear-gradient(135deg, color-mix(in oklch, var(--primary) 15%, white 85%) 0%, color-mix(in oklch, var(--secondary) 15%, white 85%) 100%)] text-[color-mix(in oklch, var(--primary-foreground) 80%, var(--muted-foreground) 20%)]"
-                            : pathname !== subItem.href && "text-gray-600 hover:bg-gray-50",
-                        )}
-                        style={
-                          isCreateCustomQuizActive
-                            ? {
+                      return (
+                        <Link
+                          key={subItem.name}
+                          href={subItem.href}
+                          className={cn(
+                            "flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors",
+                            isCreateCustomExamActive
+                              ? "bg-[linear-gradient(135deg, color-mix(in oklch, var(--primary) 15%, white 85%) 0%, color-mix(in oklch, var(--secondary) 15%, white 85%) 100%)] text-[color-mix(in oklch, var(--primary-foreground) 80%, var(--muted-foreground) 20%)]"
+                              : pathname !== subItem.href && "text-gray-600 hover:bg-gray-50",
+                          )}
+                          style={
+                            isCreateCustomExamActive
+                              ? {
                                 backgroundColor: "linear-gradient(135deg, color-mix(in oklch, var(--primary) 15%, white 85%) 0%, color-mix(in oklch, var(--secondary) 15%, white 85%) 100%)",
                                 color: "color-mix(in oklch, var(--primary-foreground) 80%, var(--muted-foreground) 20%)",
                               }
-                            : pathname === subItem.href
-                              ? {
+                              : pathname === subItem.href
+                                ? {
                                   backgroundColor: "linear-gradient(135deg, color-mix(in oklch, var(--primary) 15%, white 85%) 0%, color-mix(in oklch, var(--secondary) 15%, white 85%) 100%)",
                                   color: "color-mix(in oklch, var(--primary-foreground) 80%, var(--muted-foreground) 20%)",
                                 }
-                              : undefined
-                        }
-                      >
-                        <subItem.icon className="w-4 h-4" />
-                        {subItem.name}
-                      </Link>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          )
-        })}
-      </nav>
+                                : undefined
+                          }
+                        >
+                          <subItem.icon className="w-4 h-4" />
+                          {subItem.name}
+                        </Link>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {/* Custom Quiz Sub-navigation */}
+                {item.label === "Custom Quiz" && isCustomQuizzesExpanded && !isCollapsed && (
+                  <div className="ml-4 mt-1 space-y-1">
+                    {customQuizSubNavigation.map((subItem) => {
+                      const isCreateCustomQuizActive = subItem.name === "Create Custom Quiz" &&
+                        (pathname === subItem.href ||
+                          pathname === "/custom-quiz/section" ||
+                          pathname === "/custom-quiz/students" ||
+                          pathname === "/custom-quiz/form" ||
+                          pathname === "/custom-quiz/assign");
+
+                      return (
+                        <Link
+                          key={subItem.name}
+                          href={subItem.href}
+                          className={cn(
+                            "flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors",
+                            isCreateCustomQuizActive
+                              ? "bg-[linear-gradient(135deg, color-mix(in oklch, var(--primary) 15%, white 85%) 0%, color-mix(in oklch, var(--secondary) 15%, white 85%) 100%)] text-[color-mix(in oklch, var(--primary-foreground) 80%, var(--muted-foreground) 20%)]"
+                              : pathname !== subItem.href && "text-gray-600 hover:bg-gray-50",
+                          )}
+                          style={
+                            isCreateCustomQuizActive
+                              ? {
+                                backgroundColor: "linear-gradient(135deg, color-mix(in oklch, var(--primary) 15%, white 85%) 0%, color-mix(in oklch, var(--secondary) 15%, white 85%) 100%)",
+                                color: "color-mix(in oklch, var(--primary-foreground) 80%, var(--muted-foreground) 20%)",
+                              }
+                              : pathname === subItem.href
+                                ? {
+                                  backgroundColor: "linear-gradient(135deg, color-mix(in oklch, var(--primary) 15%, white 85%) 0%, color-mix(in oklch, var(--secondary) 15%, white 85%) 100%)",
+                                  color: "color-mix(in oklch, var(--primary-foreground) 80%, var(--muted-foreground) 20%)",
+                                }
+                                : undefined
+                          }
+                        >
+                          <subItem.icon className="w-4 h-4" />
+                          {subItem.name}
+                        </Link>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            )
+          })}
+        </nav>
 
         {/* Bottom Section */}
         <div className="p-4 border-t border-gray-200 space-y-2">

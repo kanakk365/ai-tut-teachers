@@ -58,17 +58,17 @@ export default function CustomExamConfirmationPage() {
     const students = sessionStorage.getItem('customExamSelectedStudents')
     const gradeSection = sessionStorage.getItem('customExamGradeAndSection')
     const formData = sessionStorage.getItem('examFormData')
-    
+
     console.log('Students from storage:', students) // Debug log
     console.log('Grade section from storage:', gradeSection) // Debug log
     console.log('Form data from storage:', formData) // Debug log
-    
+
     if (students) {
       const parsedStudents = JSON.parse(students)
       console.log('Parsed students:', parsedStudents) // Debug log
       setSelectedStudents(parsedStudents.selectedStudents || [])
     }
-    
+
     if (gradeSection) {
       setGradeAndSection(JSON.parse(gradeSection))
     }
@@ -134,8 +134,8 @@ export default function CustomExamConfirmationPage() {
 
       console.log('Transformed payload:', transformedPayload)
 
-      const createResponse = await api.post('/institution-admin/custom-exams/create', transformedPayload)
-      
+      const createResponse = await api.post('/teacher/custom-exams/create', transformedPayload)
+
       if (!createResponse.data.success) {
         setError(createResponse.data.message || 'Failed to create exam')
         return
@@ -158,16 +158,16 @@ export default function CustomExamConfirmationPage() {
 
       console.log('Assigning exam with data:', assignmentData)
 
-      const assignResponse = await api.post('/institution-admin/custom-exams/assign', assignmentData)
-      
+      const assignResponse = await api.post('/teacher/custom-exams/assign', assignmentData)
+
       if (assignResponse.data.success) {
         setSuccess(`Exam created and assigned successfully to ${assignResponse.data.data.assignedCount} students`)
-        
+
         // Clear sessionStorage
         sessionStorage.removeItem('customExamSelectedStudents')
         sessionStorage.removeItem('customExamGradeAndSection')
         sessionStorage.removeItem('examFormData')
-        
+
         // Redirect to main page after success
         setTimeout(() => {
           router.push('/custom-exam')
@@ -210,9 +210,9 @@ export default function CustomExamConfirmationPage() {
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="max-w-6xl mx-auto">
         <div className="mb-8">
-          <button 
-            type="button" 
-            onClick={handleEdit} 
+          <button
+            type="button"
+            onClick={handleEdit}
             className="text-gray-600 hover:text-gray-800 mb-4"
           >
             ← Back to Edit

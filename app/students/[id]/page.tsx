@@ -127,7 +127,7 @@ export default function StudentDetailPage() {
   const router = useRouter();
   const params = useParams();
   const studentId = params.id as string;
-  
+
   const [student, setStudent] = useState<Student | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -135,7 +135,7 @@ export default function StudentDetailPage() {
   const [statsLoading, setStatsLoading] = useState(false);
   const [statsError, setStatsError] = useState('');
   const [selectedMetric, setSelectedMetric] = useState<MetricKey>('averageScore');
-  
+
   // Expandable sections state
   const [expandedSections, setExpandedSections] = useState({
     overview: true,
@@ -233,18 +233,18 @@ export default function StudentDetailPage() {
   useEffect(() => {
     const fetchStudent = async () => {
       if (!studentId) return;
-      
+
       try {
         setLoading(true);
-        const response = await api.get<ApiResponse<{ student: Student }>>(`/institution-admin/students/${studentId}`);
-        
+        const response = await api.get<ApiResponse<{ student: Student }>>(`/teacher/students/${studentId}`);
+
         if (response.data.success) {
           setStudent(response.data.data.student);
         } else {
           setError('Failed to fetch student details');
         }
       } catch (err: unknown) {
-        const errorMessage = err instanceof Error && 'response' in err 
+        const errorMessage = err instanceof Error && 'response' in err
           ? (err as Error & { response?: { data?: { message?: string } } }).response?.data?.message || 'Failed to fetch student details'
           : 'Failed to fetch student details';
         setError(errorMessage);

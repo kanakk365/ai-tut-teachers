@@ -63,7 +63,7 @@ export function StudentAttempts({ quizTitle, quiz, onBack }: StudentAttemptsProp
 
   const fetchQuizDetails = useCallback(async (quizId: string) => {
     try {
-      const response = await api.get(`/institution-admin/quizzes/${quizId}`)
+      const response = await api.get(`/teacher/quizzes/${quizId}`)
       if (response.data.success) {
         setDetailedQuiz(response.data.data.quiz)
       }
@@ -121,12 +121,12 @@ export function StudentAttempts({ quizTitle, quiz, onBack }: StudentAttemptsProp
 
   const filteredSubmissions = submissions.filter((submission: Submission) => {
     if (!submission || !submission.user) return false
-    
+
     const fullName = `${submission.user.firstName || ''} ${submission.user.lastName || ''}`.trim()
     const email = submission.user.email || ''
-    
+
     return fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-           email.toLowerCase().includes(searchTerm.toLowerCase())
+      email.toLowerCase().includes(searchTerm.toLowerCase())
   })
 
   const handleViewDetails = (submission: Submission) => {
@@ -141,9 +141,9 @@ export function StudentAttempts({ quizTitle, quiz, onBack }: StudentAttemptsProp
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-4">
-            <Button 
-              variant="ghost" 
-              onClick={() => setShowDetails(false)} 
+            <Button
+              variant="ghost"
+              onClick={() => setShowDetails(false)}
               className="text-2xl px-2"
               type="button"
             >
@@ -151,7 +151,7 @@ export function StudentAttempts({ quizTitle, quiz, onBack }: StudentAttemptsProp
             </Button>
             <div>
               <h1 className="text-2xl font-semibold">
-                {selectedSubmission.user 
+                {selectedSubmission.user
                   ? `${selectedSubmission.user.firstName || ''} ${selectedSubmission.user.lastName || ''}`.trim()
                   : 'Unknown Student'
                 }
@@ -170,7 +170,7 @@ export function StudentAttempts({ quizTitle, quiz, onBack }: StudentAttemptsProp
             <h2 className="text-lg font-medium">Overview</h2>
             {overviewExpanded ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
           </button>
-          
+
           {overviewExpanded && (
             <div className="px-4 pb-4 border-t border-gray-100">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
@@ -193,7 +193,7 @@ export function StudentAttempts({ quizTitle, quiz, onBack }: StudentAttemptsProp
                     <div>
                       <div className="text-sm text-gray-600">Student</div>
                       <div className="font-medium">
-                        {selectedSubmission.user 
+                        {selectedSubmission.user
                           ? `${selectedSubmission.user.firstName || ''} ${selectedSubmission.user.lastName || ''}`.trim() + ` (Grade 5B)`
                           : 'Unknown Student'
                         }
@@ -208,7 +208,7 @@ export function StudentAttempts({ quizTitle, quiz, onBack }: StudentAttemptsProp
                   </div>
                 </div>
               </div>
-              
+
               <div className="mt-6">
                 <div className="space-y-3">
                   <div>
@@ -218,9 +218,8 @@ export function StudentAttempts({ quizTitle, quiz, onBack }: StudentAttemptsProp
                   <div>
                     <div className="text-sm text-gray-600">Status</div>
                     <div className="font-medium">
-                      <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                        (selectedSubmission.score || 0) >= 60 ? 'bg-[var(--primary-100)] text-[color:var(--primary-800)]' : 'bg-red-100 text-red-800'
-                      }`}>
+                      <span className={`px-3 py-1 rounded-full text-sm font-medium ${(selectedSubmission.score || 0) >= 60 ? 'bg-[var(--primary-100)] text-[color:var(--primary-800)]' : 'bg-red-100 text-red-800'
+                        }`}>
                         Submitted
                       </span>
                     </div>
@@ -241,23 +240,22 @@ export function StudentAttempts({ quizTitle, quiz, onBack }: StudentAttemptsProp
             <h2 className="text-lg font-medium">Question and Answers</h2>
             {questionsExpanded ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
           </button>
-          
+
           {questionsExpanded && selectedSubmission.answers && selectedSubmission.answers.length > 0 && (
             <div className="px-4 pb-4 border-t border-gray-100">
               <div className="space-y-6 mt-4">
                 {selectedSubmission.answers.map((answer, idx) => (
                   <div key={answer.questionId || idx} className="space-y-3">
                     <div className="font-medium">Q{idx + 1}. {getQuestionText(answer.questionId)}</div>
-                    
+
                     <div className="space-y-2">
                       <div>
-                        <span className={`text-sm font-medium ${
-                          answer.isCorrect ? 'text-[color:var(--primary-600)]' : 'text-red-600'
-                        }`}>
+                        <span className={`text-sm font-medium ${answer.isCorrect ? 'text-[color:var(--primary-600)]' : 'text-red-600'
+                          }`}>
                           Student's Answer: {getOptionText(answer.questionId, answer.selectedOptionId)} - {answer.isCorrect ? 'Correct' : 'Incorrect'}
                         </span>
                       </div>
-                      
+
                       <div>
                         <span className="text-sm text-[color:var(--primary-600)] font-medium">
                           Correct Answer: {getCorrectOption(answer.questionId)}
@@ -290,8 +288,8 @@ export function StudentAttempts({ quizTitle, quiz, onBack }: StudentAttemptsProp
         </div>
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-          <Input 
-            placeholder="Search submissions here" 
+          <Input
+            placeholder="Search submissions here"
             className="pl-10 w-64 border-gray-200 focus:border-[color:var(--primary-500)] focus:ring-[color:var(--primary-500)]"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -341,15 +339,14 @@ export function StudentAttempts({ quizTitle, quiz, onBack }: StudentAttemptsProp
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-600">{formatDate(submission.submittedAt)}</td>
                     <td className="px-6 py-4 text-sm">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        (submission.score || 0) >= 60 ? 'bg-[var(--primary-100)] text-[color:var(--primary-800)]' : 'bg-red-100 text-red-800'
-                      }`}>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${(submission.score || 0) >= 60 ? 'bg-[var(--primary-100)] text-[color:var(--primary-800)]' : 'bg-red-100 text-red-800'
+                        }`}>
                         {(submission.score || 0) >= 60 ? 'Passed' : 'Failed'}
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      <Button 
-                        size="sm" 
+                      <Button
+                        size="sm"
                         className="button-primary px-4 py-1 text-sm font-medium rounded"
                         onClick={() => handleViewDetails(submission)}
                         type="button"

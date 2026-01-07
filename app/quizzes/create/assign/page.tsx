@@ -58,7 +58,7 @@ export default function QuizAssignPage() {
   useEffect(() => {
     // Get the quiz grade and section data from the updated selection flow
     const quizData = sessionStorage.getItem('quizGradeAndSection')
-    
+
     if (quizData) {
       const parsedData: GradeAndSectionData = JSON.parse(quizData)
       setGradeAndSection(parsedData)
@@ -70,17 +70,17 @@ export default function QuizAssignPage() {
 
   const handleAssignToAll = (students?: Student[]) => {
     if (!gradeAndSection) return
-    
+
     // Prepare data for quiz-form component
     const quizData = {
       selectedStudents: students || [], // Pass the actual students
       standardName: gradeAndSection.standardName,
       sectionName: gradeAndSection.sectionName
     }
-    
+
     // Store the data for quiz-form component
     sessionStorage.setItem('selectedStudentsForQuiz', JSON.stringify(quizData))
-    
+
     // Navigate to quiz-form
     router.push('/quizzes/quiz-form')
   }
@@ -100,9 +100,9 @@ export default function QuizAssignPage() {
 
   const handleGenerateQuiz = async () => {
     if (!quizFormData) return
-    
+
     setIsGenerating(true)
-    
+
     try {
       // Prepare the API payload
       const payload: QuizGenerationPayload = {
@@ -116,8 +116,8 @@ export default function QuizAssignPage() {
       }
 
       // Call the quiz generation API
-      const response = await api.post('/institution-admin/quizzes/generate', payload)
-      
+      const response = await api.post('/teacher/quizzes/generate', payload)
+
       if (response.data.success) {
         setCurrentStep("generated")
       } else {
@@ -271,7 +271,7 @@ export default function QuizAssignPage() {
                 <h1 className="text-2xl font-semibold text-gray-900 mb-2">Quiz Generated Successfully!</h1>
                 <p className="text-gray-600">Your quiz has been created and is ready to be assigned to students.</p>
               </div>
-              
+
               <div className="flex gap-4 justify-center">
                 <button
                   type="button"

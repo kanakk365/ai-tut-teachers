@@ -1,12 +1,12 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useMemo } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { ChevronDown, Plus, Search, Loader2, Eye, EyeOff } from "lucide-react"
+import { ChevronDown, Plus, Search, Loader2 } from "lucide-react"
 import { Sidebar } from "@/components/ui/sidebar"
 import api from "@/lib/api"
 
@@ -16,17 +16,6 @@ interface Student {
   email: string
   firstName: string
   lastName: string
-  dob: string
-  gender: string
-  phone: string
-  password: string
-  photoUrl?: string
-  isActive: boolean
-  isVerified: boolean
-  institution: {
-    id: string
-    name: string
-  }
   standard?: {
     id: string
     name: string
@@ -57,12 +46,6 @@ interface ApiResponse<T> {
 
 interface StudentsResponse {
   students: Student[]
-  pagination: {
-    currentPage: number
-    totalPages: number
-    totalCount: number
-    limit: number
-  }
 }
 
 interface StandardsResponse {
@@ -77,39 +60,26 @@ interface StandardsResponse {
 
 export default function StudentDashboard() {
   const router = useRouter()
-  
+
   // State for students data
   const [students, setStudents] = useState<Student[]>([])
   const [filteredStudents, setFilteredStudents] = useState<Student[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
-  
+
   // State for standards/grades data
   const [standards, setStandards] = useState<Standard[]>([])
   const [allSections, setAllSections] = useState<Section[]>([])
   const [availableSections, setAvailableSections] = useState<Section[]>([])
-  
+
   // Filter states
   const [selectedGrade, setSelectedGrade] = useState<string>("")
   const [selectedSection, setSelectedSection] = useState<string>("")
   const [searchQuery, setSearchQuery] = useState("")
-  
-  // Pagination
+
+  // Pagination state (frontend)
   const [currentPage, setCurrentPage] = useState(1)
-  const [totalPages, setTotalPages] = useState(1)
-  const [totalCount, setTotalCount] = useState(0)
-  const limit = 10
-
-  // Password visibility state
-  const [visiblePasswords, setVisiblePasswords] = useState<Record<string, boolean>>({})
-
-  // Toggle password visibility for a specific student
-  const togglePasswordVisibility = (studentId: string) => {
-    setVisiblePasswords(prev => ({
-      ...prev,
-      [studentId]: !prev[studentId]
-    }))
-  }
+  const itemsPerPage = 10
 
   // Fetch all standards with their sections from API
   const fetchStandardsWithSections = useCallback(async () => {
@@ -120,12 +90,12 @@ export default function StudentDashboard() {
 
       while (hasMorePages) {
         const response = await api.get<ApiResponse<StandardsResponse>>(
-          `/institution-admin/standards?page=${currentPage}`
+          `/teacher/standards?page=${currentPage}`
         )
-        
+
         if (response.data.success) {
           allStandards = [...allStandards, ...response.data.data.standards]
-          
+
           // Check if there are more pages
           if (currentPage >= response.data.data.pagination.totalPages) {
             hasMorePages = false
@@ -138,7 +108,7 @@ export default function StudentDashboard() {
       }
 
       setStandards(allStandards)
-      
+
       // Extract all sections from all standards
       const allSectionsFromStandards: Section[] = []
       allStandards.forEach(standard => {
@@ -147,33 +117,30 @@ export default function StudentDashboard() {
         }
       })
       setAllSections(allSectionsFromStandards)
-      
+
       console.log('Fetched standards with sections:', allStandards)
       console.log('All sections extracted:', allSectionsFromStandards)
-      
+
     } catch (err) {
       console.error('Error fetching standards:', err)
     }
   }, [])
 
   // Fetch students from API
-  const fetchStudents = useCallback(async (page = 1, search = "") => {
+  const fetchStudents = useCallback(async (search = "") => {
     try {
       setLoading(true)
-      let url = `/institution-admin/students?page=${page}&limit=${limit}`
-      
+      let url = `/teacher/students`
+
       if (search.trim()) {
-        url += `&search=${encodeURIComponent(search.trim())}`
+        url += `?search=${encodeURIComponent(search.trim())}`
       }
 
       const response = await api.get<ApiResponse<StudentsResponse>>(url)
-      
+
       if (response.data.success) {
         const studentsData = response.data.data.students
         setStudents(studentsData)
-        setCurrentPage(response.data.data.pagination.currentPage)
-        setTotalPages(response.data.data.pagination.totalPages)
-        setTotalCount(response.data.data.pagination.totalCount)
       }
     } catch (err) {
       setError('Failed to fetch students')
@@ -194,7 +161,7 @@ export default function StudentDashboard() {
     if (selectedGrade) {
       const sectionsForGrade = getSectionsForGrade(selectedGrade)
       setAvailableSections(sectionsForGrade)
-      
+
       // Reset section selection if current selection is not available for this grade
       if (selectedSection && !sectionsForGrade.find(section => section.name === selectedSection)) {
         setSelectedSection("")
@@ -243,22 +210,32 @@ export default function StudentDashboard() {
   // Apply filters when dependencies change
   useEffect(() => {
     applyFilters()
+    setCurrentPage(1) // Reset to first page when filters change
   }, [applyFilters])
 
   // Handle search with debounce effect
   useEffect(() => {
     const timeoutId = setTimeout(() => {
-      setCurrentPage(1)
-      fetchStudents(1, searchQuery)
+      fetchStudents(searchQuery)
+      setCurrentPage(1) // Reset to first page on search
     }, 300)
-    
+
     return () => clearTimeout(timeoutId)
   }, [searchQuery, fetchStudents])
 
-  // Handle pagination
+  // Calculate paginated students (frontend pagination)
+  const paginatedStudents = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage
+    const endIndex = startIndex + itemsPerPage
+    return filteredStudents.slice(startIndex, endIndex)
+  }, [filteredStudents, currentPage, itemsPerPage])
+
+  const totalPages = Math.ceil(filteredStudents.length / itemsPerPage)
+  const totalCount = filteredStudents.length
+
   const handlePageChange = (page: number) => {
     if (page >= 1 && page <= totalPages) {
-      fetchStudents(page, searchQuery)
+      setCurrentPage(page)
     }
   }
 
@@ -292,7 +269,7 @@ export default function StudentDashboard() {
               {/* Header with controls */}
               <div className="flex items-center justify-between mb-6">
                 <h1 className="text-2xl font-semibold text-gray-900">Students</h1>
-                
+
                 <div className="flex items-center gap-3">
                   {/* Grade Filter */}
                   <DropdownMenu>
@@ -302,13 +279,13 @@ export default function StudentDashboard() {
                         <ChevronDown className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent 
+                    <DropdownMenuContent
                       className="w-[140px] bg-white border border-gray-200 shadow-lg rounded-md p-1 max-h-60 overflow-y-auto z-50"
                       align="start"
                       side="bottom"
                       sideOffset={4}
                     >
-                      <DropdownMenuItem 
+                      <DropdownMenuItem
                         onClick={() => {
                           setSelectedGrade("")
                           setSelectedSection("") // Reset section when clearing grade
@@ -325,11 +302,10 @@ export default function StudentDashboard() {
                             setSelectedGrade(standard.name)
                             setSelectedSection("") // Reset section when grade changes
                           }}
-                          className={`px-3 py-2 text-sm cursor-pointer rounded-sm ${
-                            selectedGrade === standard.name 
-                              ? "bg-[var(--primary-500)] text-[color:var(--primary-foreground)]" 
-                              : "text-gray-700 hover:bg-gray-50"
-                          }`}
+                          className={`px-3 py-2 text-sm cursor-pointer rounded-sm ${selectedGrade === standard.name
+                            ? "bg-[var(--primary-500)] text-[color:var(--primary-foreground)]"
+                            : "text-gray-700 hover:bg-gray-50"
+                            }`}
                         >
                           {standard.name}
                         </DropdownMenuItem>
@@ -345,13 +321,13 @@ export default function StudentDashboard() {
                         <ChevronDown className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent 
+                    <DropdownMenuContent
                       className="w-[140px] bg-white border border-gray-200 shadow-lg rounded-md p-1 max-h-60 overflow-y-auto z-50"
                       align="start"
                       side="bottom"
                       sideOffset={4}
                     >
-                      <DropdownMenuItem 
+                      <DropdownMenuItem
                         onClick={() => setSelectedSection("")}
                         className="px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 cursor-pointer rounded-sm"
                       >
@@ -362,11 +338,10 @@ export default function StudentDashboard() {
                           <DropdownMenuItem
                             key={section.id}
                             onClick={() => setSelectedSection(section.name)}
-                            className={`px-3 py-2 text-sm cursor-pointer rounded-sm ${
-                              selectedSection === section.name 
-                                ? "bg-[var(--primary-500)] text-[color:var(--primary-foreground)]" 
-                                : "text-gray-700 hover:bg-gray-50"
-                            }`}
+                            className={`px-3 py-2 text-sm cursor-pointer rounded-sm ${selectedSection === section.name
+                              ? "bg-[var(--primary-500)] text-[color:var(--primary-foreground)]"
+                              : "text-gray-700 hover:bg-gray-50"
+                              }`}
                           >
                             Section {section.name}
                           </DropdownMenuItem>
@@ -391,7 +366,7 @@ export default function StudentDashboard() {
                     <Plus className="h-4 w-4 mr-2" />
                     Add new user
                   </Button>
-                  
+
                   {/* Search Bar */}
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
@@ -412,46 +387,20 @@ export default function StudentDashboard() {
                     <TableRow className="bg-gray-50 border-b border-gray-200">
                       <TableHead className="font-medium text-gray-700 py-4 px-6">Name</TableHead>
                       <TableHead className="font-medium text-gray-700 py-4 px-6">Class</TableHead>
+                      <TableHead className="font-medium text-gray-700 py-4 px-6">Section</TableHead>
                       <TableHead className="font-medium text-gray-700 py-4 px-6">Email ID</TableHead>
-                      <TableHead className="font-medium text-gray-700 py-4 px-6">Phone Number</TableHead>
-                      <TableHead className="font-medium text-gray-700 py-4 px-6">Password</TableHead>
-                      <TableHead className="font-medium text-gray-700 py-4 px-6">Status</TableHead>
                       <TableHead className="font-medium text-gray-700 py-4 px-6">Action</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredStudents.map((student) => (
+                    {paginatedStudents.map((student) => (
                       <TableRow key={student.id} className="border-b border-gray-100 hover:bg-gray-50">
                         <TableCell className="py-4 px-6 font-medium text-gray-900">
                           {student.firstName} {student.lastName}
                         </TableCell>
                         <TableCell className="py-4 px-6 text-gray-600">{student.standard?.name || 'No Class'}</TableCell>
+                        <TableCell className="py-4 px-6 text-gray-600">{student.studentSection?.name || 'No Section'}</TableCell>
                         <TableCell className="py-4 px-6 text-gray-600">{student.email}</TableCell>
-                        <TableCell className="py-4 px-6 text-gray-600">{student.phone}</TableCell>
-                        <TableCell className="py-4 px-6">
-                          <div className="flex items-center gap-2">
-                            <span className={`font-mono text-sm ${visiblePasswords[student.id] ? 'text-gray-900' : 'text-gray-400'}`}>
-                              {visiblePasswords[student.id] ? student.password : '••••••••'}
-                            </span>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => togglePasswordVisibility(student.id)}
-                              className="h-6 w-6 p-0 hover:bg-gray-100"
-                            >
-                              {visiblePasswords[student.id] ? (
-                                <EyeOff className="h-4 w-4 text-gray-500" />
-                              ) : (
-                                <Eye className="h-4 w-4 text-gray-500" />
-                              )}
-                            </Button>
-                          </div>
-                        </TableCell>
-                        <TableCell className="py-4 px-6">
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[var(--primary-100)] text-[color:var(--primary-800)]">
-                            {student.isActive ? 'Active' : 'Inactive'}
-                          </span>
-                        </TableCell>
                         <TableCell className="py-4 px-6">
                           <Button
                             size="sm"
@@ -471,7 +420,7 @@ export default function StudentDashboard() {
               {totalPages > 1 && (
                 <div className="flex items-center justify-between mt-6">
                   <div className="text-sm text-gray-700">
-                    Showing {((currentPage - 1) * limit) + 1} to {Math.min(currentPage * limit, totalCount)} of {totalCount} results
+                    Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, totalCount)} of {totalCount} results
                   </div>
                   <div className="flex gap-2">
                     <Button

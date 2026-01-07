@@ -52,11 +52,11 @@ export function GradeSelection() {
       let hasMorePages = true
 
       while (hasMorePages) {
-        const response = await api.get<StandardsResponse>(`/institution-admin/standards?page=${currentPage}`)
-        
+        const response = await api.get<StandardsResponse>(`/teacher/standards?page=${currentPage}`)
+
         if (response.data.success) {
           allStandards = [...allStandards, ...response.data.data.standards]
-          
+
           // Check if there are more pages
           if (currentPage >= response.data.data.pagination.totalPages) {
             hasMorePages = false

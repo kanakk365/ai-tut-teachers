@@ -131,8 +131,8 @@ export function CustomExamHistory({ onViewExam, onViewExamById }: CustomExamHist
     const fetchCustomExams = async () => {
       try {
         setLoading(true)
-        const response = await api.get<ApiResponse<CustomExamsResponse>>('/institution-admin/custom-exams/get')
-        
+        const response = await api.get<ApiResponse<CustomExamsResponse>>('/teacher/custom-exams/get')
+
         if (response.data.success) {
           setExams(response.data.data.exams)
         } else {
@@ -195,8 +195,8 @@ export function CustomExamHistory({ onViewExam, onViewExamById }: CustomExamHist
         <h1 className="text-2xl font-semibold">Custom Exams History</h1>
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-          <Input 
-            placeholder="Search custom exams here" 
+          <Input
+            placeholder="Search custom exams here"
             className="pl-10 w-64 border-gray-200 focus:border-[var(--primary-500)] focus:ring-[var(--primary-500)]"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -227,7 +227,7 @@ export function CustomExamHistory({ onViewExam, onViewExamById }: CustomExamHist
                 </td>
                 <td className="px-6 py-4 text-sm text-gray-600">{exam.topic}</td>
                 <td className="px-6 py-4 text-sm text-gray-600">
-                  {exam.standard && exam.section 
+                  {exam.standard && exam.section
                     ? `${exam.standard.name} - ${exam.section.name}`
                     : 'Not assigned'
                   }
@@ -239,8 +239,8 @@ export function CustomExamHistory({ onViewExam, onViewExamById }: CustomExamHist
                   {exam.averageScore ? `${exam.averageScore}%` : 'N/A'}
                 </td>
                 <td className="px-6 py-4">
-                  <Button 
-                    size="sm" 
+                  <Button
+                    size="sm"
                     className="px-4 py-1 text-sm font-medium rounded button-primary"
                     onClick={() => handleViewExam(exam)}
                   >
@@ -291,7 +291,7 @@ export function CustomExamAttempts({ examId, examTitle, onBack }: CustomExamAtte
     const fetchExamDetail = async () => {
       try {
         setLoading(true)
-        const response = await api.get(`/institution-admin/custom-exams/get/${examId}`)
+        const response = await api.get(`/teacher/custom-exams/get/${examId}`)
 
         if (response.data.success) {
           setExamDetail(response.data.data.exam)
@@ -416,9 +416,8 @@ export function CustomExamAttempts({ examId, examTitle, onBack }: CustomExamAtte
                 <div>
                   <div className="text-sm text-gray-600">Status</div>
                   <div className="font-medium">
-                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                      (selectedSubmission.score || 0) >= 60 ? 'bg-[var(--primary-100)] text-[color:var(--primary-800)]' : 'bg-red-100 text-red-800'
-                    }`}>
+                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${(selectedSubmission.score || 0) >= 60 ? 'bg-[var(--primary-100)] text-[color:var(--primary-800)]' : 'bg-red-100 text-red-800'
+                      }`}>
                       {(selectedSubmission.score || 0) >= 60 ? 'Passed' : 'Failed'}
                     </span>
                   </div>
@@ -444,9 +443,8 @@ export function CustomExamAttempts({ examId, examTitle, onBack }: CustomExamAtte
 
                       <div className="space-y-2">
                         <div>
-                          <span className={`text-sm font-medium ${
-                            answer.isCorrect ? 'text-[color:var(--primary-600)]' : 'text-red-600'
-                          }`}>
+                          <span className={`text-sm font-medium ${answer.isCorrect ? 'text-[color:var(--primary-600)]' : 'text-red-600'
+                            }`}>
                             Student's Answer: {answer.studentAnswer || 'Not answered'} - {answer.isCorrect ? 'Correct' : 'Incorrect'}
                           </span>
                         </div>
@@ -559,9 +557,8 @@ export function CustomExamAttempts({ examId, examTitle, onBack }: CustomExamAtte
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-600">{formatDate(submission.submittedAt)}</td>
                       <td className="px-6 py-4 text-sm">
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          (submission.score || 0) >= 60 ? 'bg-[var(--primary-100)] text-[color:var(--primary-800)]' : 'bg-red-100 text-red-800'
-                        }`}>
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${(submission.score || 0) >= 60 ? 'bg-[var(--primary-100)] text-[color:var(--primary-800)]' : 'bg-red-100 text-red-800'
+                          }`}>
                           {(submission.score || 0) >= 60 ? 'Passed' : 'Failed'}
                         </span>
                       </td>

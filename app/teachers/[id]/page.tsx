@@ -66,7 +66,7 @@ export default function TeacherDetailPage() {
 
       try {
         setLoading(true)
-        const response = await api.get<ApiResponse<{ teacher: Teacher }>>(`/institution-admin/teachers/${teacherId}`)
+        const response = await api.get<ApiResponse<{ teacher: Teacher }>>(`/teacher/teachers/${teacherId}`)
 
         if (response.data.success) {
           setTeacher(response.data.data.teacher)
@@ -163,50 +163,50 @@ export default function TeacherDetailPage() {
 
           {/* Teacher Information Card */}
           <Card className="border-0 shadow-sm">
-              <CardContent>
-                <div className="flex items-center gap-6">
-                  {/* Avatar and Basic Info */}
-                  <div className="flex items-center gap-3">
-                    <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center">
-                      <span className="text-blue-600 font-semibold">
-                        {teacher.firstName.charAt(0)}{teacher.lastName.charAt(0)}
-                      </span>
-                    </div>
-                    <div>
-                      <p className="font-medium text-gray-900">
-                        {teacher.firstName} {teacher.lastName}
-                      </p>
-                    </div>
+            <CardContent>
+              <div className="flex items-center gap-6">
+                {/* Avatar and Basic Info */}
+                <div className="flex items-center gap-3">
+                  <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center">
+                    <span className="text-blue-600 font-semibold">
+                      {teacher.firstName.charAt(0)}{teacher.lastName.charAt(0)}
+                    </span>
                   </div>
-
-                  {/* Contact Information */}
-                  <div className="flex items-center gap-6">
-                    <div className="flex items-center gap-2">
-                      <User className="h-4 w-4 text-gray-400" />
-                      <span className="text-sm text-gray-600">{teacher.email}</span>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <GraduationCap className="h-4 w-4 text-gray-400" />
-                      <span className="text-sm text-gray-600">{teacher.institution.name}</span>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4 text-gray-400" />
-                      <span className="text-sm text-gray-600">
-                        Joined {formatDate(teacher.createdAt)}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Status Badge */}
-                  <div className="ml-auto">
-                    <Badge variant={teacher.isActive ? "default" : "secondary"}>
-                      {teacher.isActive ? "Active" : "Inactive"}
-                    </Badge>
+                  <div>
+                    <p className="font-medium text-gray-900">
+                      {teacher.firstName} {teacher.lastName}
+                    </p>
                   </div>
                 </div>
-              </CardContent>
+
+                {/* Contact Information */}
+                <div className="flex items-center gap-6">
+                  <div className="flex items-center gap-2">
+                    <User className="h-4 w-4 text-gray-400" />
+                    <span className="text-sm text-gray-600">{teacher.email}</span>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <GraduationCap className="h-4 w-4 text-gray-400" />
+                    <span className="text-sm text-gray-600">{teacher.institution.name}</span>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4 text-gray-400" />
+                    <span className="text-sm text-gray-600">
+                      Joined {formatDate(teacher.createdAt)}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Status Badge */}
+                <div className="ml-auto">
+                  <Badge variant={teacher.isActive ? "default" : "secondary"}>
+                    {teacher.isActive ? "Active" : "Inactive"}
+                  </Badge>
+                </div>
+              </div>
+            </CardContent>
           </Card>
 
           {/* Exams Section */}

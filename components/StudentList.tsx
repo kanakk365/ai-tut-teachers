@@ -64,12 +64,12 @@ export function StudentList({ standardName, sectionName, examTitle, onAssignExam
 
       while (hasMorePages) {
         const response = await api.get<ApiResponse<StudentsResponse>>(
-          `/institution-admin/students?page=${currentPage}&standardName=${encodeURIComponent(standardName)}&sectionName=${encodeURIComponent(sectionName)}`
+          `/teacher/students?page=${currentPage}&standardName=${encodeURIComponent(standardName)}&sectionName=${encodeURIComponent(sectionName)}`
         )
-        
+
         if (response.data.success) {
           allStudents = [...allStudents, ...response.data.data.students]
-          
+
           // Check if there are more pages
           if (currentPage >= response.data.data.pagination.totalPages) {
             hasMorePages = false
@@ -151,8 +151,8 @@ export function StudentList({ standardName, sectionName, examTitle, onAssignExam
           </h1>
         </div>
         <div className="flex items-center gap-4">
-          <Button 
-            onClick={() => onAssignExam(students)} 
+          <Button
+            onClick={() => onAssignExam(students)}
             className="px-6 button-primary"
             disabled={students.length === 0}
           >
@@ -160,8 +160,8 @@ export function StudentList({ standardName, sectionName, examTitle, onAssignExam
           </Button>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-            <Input 
-              placeholder="Search students here" 
+            <Input
+              placeholder="Search students here"
               className="pl-10 w-64 border-gray-200 focus:border-[var(--primary-500)] focus:ring-[var(--primary-500)]"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -201,9 +201,9 @@ export function StudentList({ standardName, sectionName, examTitle, onAssignExam
                   <td className="px-6 py-4 text-sm text-gray-600">Section {student.studentSection.name}</td>
                   <td className="px-6 py-4 text-sm font-medium" style={{ color: "var(--primary-600)" }}>Active</td>
                   <td className="px-6 py-4">
-                    <Button 
-                      size="sm" 
-                      className="px-4 py-1 text-sm font-medium rounded button-primary" 
+                    <Button
+                      size="sm"
+                      className="px-4 py-1 text-sm font-medium rounded button-primary"
                       onClick={() => onAssignExam([student])}
                     >
                       Assign

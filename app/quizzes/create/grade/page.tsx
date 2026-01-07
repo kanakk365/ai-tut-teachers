@@ -49,11 +49,11 @@ export default function QuizGradeSelectionPage() {
       let hasMorePages = true
 
       while (hasMorePages) {
-        const response = await api.get<StandardsResponse>(`/institution-admin/standards?page=${currentPage}`)
-        
+        const response = await api.get<StandardsResponse>(`/teacher/standards?page=${currentPage}`)
+
         if (response.data.success) {
           allStandards = [...allStandards, ...response.data.data.standards]
-          
+
           // Check if there are more pages
           if (currentPage >= response.data.data.pagination.totalPages) {
             hasMorePages = false
@@ -81,7 +81,7 @@ export default function QuizGradeSelectionPage() {
 
   const handleGradeSelect = (standard: Standard) => {
     setSelectedStandard(standard)
-    
+
     // Store the selected standard in sessionStorage for the quiz creation flow
     sessionStorage.setItem('selectedQuizStandard', JSON.stringify(standard))
     router.push(`/quizzes/create/section`)
@@ -129,11 +129,10 @@ export default function QuizGradeSelectionPage() {
                 <button
                   key={standard.id}
                   type="button"
-                  className={`bg-cover bg-center rounded-2xl p-8 cursor-pointer transition-all duration-300 hover:scale-105 w-full h-32 min-h-[8rem] relative overflow-hidden ${
-                    selectedStandard?.id === standard.id
+                  className={`bg-cover bg-center rounded-2xl p-8 cursor-pointer transition-all duration-300 hover:scale-105 w-full h-32 min-h-[8rem] relative overflow-hidden ${selectedStandard?.id === standard.id
                       ? 'border-4 border-[color:var(--primary-500)] shadow-xl scale-105'
                       : 'border-0 hover:shadow-lg'
-                  }`}
+                    }`}
                   style={{ backgroundImage: 'url(/grade-selection.png)' }}
                   onClick={() => handleGradeSelect(standard)}
                 >

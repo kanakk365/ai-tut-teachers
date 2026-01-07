@@ -52,7 +52,7 @@ export function LoadingSpinner({ message = "Loading..." }: { message?: string })
   return (
     <div className="flex items-center justify-center h-64">
       <div className="text-center">
-  <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-[var(--primary-500)] mx-auto mb-4"></div>
+        <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-[var(--primary-500)] mx-auto mb-4"></div>
         <p className="text-gray-600 text-lg">{message}</p>
       </div>
     </div>
@@ -84,7 +84,7 @@ export function SuccessMessage({ message }: { message: string }) {
     <div className="px-4 py-3 rounded-lg"
       style={{
         backgroundColor: "var(--primary-50)",
-        border: `1px solid var(--primary-200)` ,
+        border: `1px solid var(--primary-200)`,
         color: "var(--primary-700)",
       }}
     >
@@ -94,11 +94,11 @@ export function SuccessMessage({ message }: { message: string }) {
 }
 
 // Reusable Card Selection Component
-export function SelectionCard({ 
-  title, 
-  backgroundImage, 
-  onClick, 
-  selected = false 
+export function SelectionCard({
+  title,
+  backgroundImage,
+  onClick,
+  selected = false
 }: {
   title: string
   backgroundImage: string
@@ -108,11 +108,10 @@ export function SelectionCard({
   return (
     <button
       type="button"
-      className={`bg-cover bg-center rounded-2xl p-8 cursor-pointer transition-all duration-300 hover:scale-105 w-full h-32 min-h-[8rem] relative overflow-hidden ${
-        selected
+      className={`bg-cover bg-center rounded-2xl p-8 cursor-pointer transition-all duration-300 hover:scale-105 w-full h-32 min-h-[8rem] relative overflow-hidden ${selected
           ? 'border-4 border-[var(--primary-500)] shadow-xl scale-105'
           : 'border-0 hover:shadow-lg'
-      }`}
+        }`}
       style={{ backgroundImage: `url(${backgroundImage})` }}
       onClick={onClick}
     >
@@ -126,9 +125,9 @@ export function SelectionCard({
 }
 
 // Grade Selection Component
-export function GradeSelectionStep({ 
-  onNext, 
-  title = "Select Grade" 
+export function GradeSelectionStep({
+  onNext,
+  title = "Select Grade"
 }: {
   onNext: (standard: Standard) => void
   title?: string
@@ -147,11 +146,11 @@ export function GradeSelectionStep({
       let hasMorePages = true
 
       while (hasMorePages) {
-        const response = await api.get(`/institution-admin/standards?page=${currentPage}`)
-        
+        const response = await api.get(`/teacher/standards?page=${currentPage}`)
+
         if (response.data.success) {
           allStandards = [...allStandards, ...response.data.data.standards]
-          
+
           if (currentPage >= response.data.data.pagination.totalPages) {
             hasMorePages = false
           } else {
@@ -207,10 +206,10 @@ export function GradeSelectionStep({
 }
 
 // Section Selection Component
-export function SectionSelectionStep({ 
-  standard, 
-  onNext, 
-  onBack 
+export function SectionSelectionStep({
+  standard,
+  onNext,
+  onBack
 }: {
   standard: Standard
   onNext: (section: Section) => void
@@ -258,12 +257,12 @@ export function SectionSelectionStep({
 }
 
 // Student Selection Component
-export function StudentSelectionStep({ 
-  standard, 
-  section, 
-  onNext, 
+export function StudentSelectionStep({
+  standard,
+  section,
+  onNext,
   onBack,
-  allowMultiple = true 
+  allowMultiple = true
 }: {
   standard: Standard
   section: Section
@@ -287,12 +286,12 @@ export function StudentSelectionStep({
 
       while (hasMorePages) {
         const response = await api.get(
-          `/institution-admin/students?page=${currentPage}&limit=10&standardName=${standard.name}&sectionName=${section.name}`
+          `/teacher/students?page=${currentPage}&limit=10&standardName=${standard.name}&sectionName=${section.name}`
         )
-        
+
         if (response.data.success) {
           allStudents = [...allStudents, ...response.data.data.students]
-          
+
           if (currentPage >= response.data.data.pagination.totalPages) {
             hasMorePages = false
           } else {
@@ -363,7 +362,7 @@ export function StudentSelectionStep({
         <Button onClick={handleSelectAll} variant="outline">
           {selectedStudents.length === students.length ? 'Deselect All' : 'Select All'}
         </Button>
-        
+
         <div className="relative">
           <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
           <Input
@@ -424,7 +423,7 @@ export function StudentSelectionStep({
         <Button onClick={onBack} variant="outline">
           Cancel
         </Button>
-        <Button 
+        <Button
           onClick={handleNext}
           disabled={selectedStudents.length === 0}
           className="button-primary"
@@ -437,12 +436,12 @@ export function StudentSelectionStep({
 }
 
 // Main Unified Selection Flow Component
-export function UnifiedSelectionFlow({ 
-  flowType, 
-  onComplete, 
+export function UnifiedSelectionFlow({
+  flowType,
+  onComplete,
   skipStudentSelection = false,
   allowMultipleStudents = true,
-  title 
+  title
 }: UnifiedSelectionFlowProps) {
   const [step, setStep] = useState<'grade' | 'section' | 'students'>('grade')
   const [selectedStandard, setSelectedStandard] = useState<Standard | null>(null)
@@ -486,12 +485,12 @@ export function UnifiedSelectionFlow({
   return (
     <div className="p-6">
       {step === 'grade' && (
-        <GradeSelectionStep 
-          onNext={handleGradeNext} 
+        <GradeSelectionStep
+          onNext={handleGradeNext}
           title={title || `Select Grade for ${flowType}`}
         />
       )}
-      
+
       {step === 'section' && selectedStandard && (
         <SectionSelectionStep
           standard={selectedStandard}
@@ -499,7 +498,7 @@ export function UnifiedSelectionFlow({
           onBack={handleBack}
         />
       )}
-      
+
       {step === 'students' && selectedStandard && selectedSection && (
         <StudentSelectionStep
           standard={selectedStandard}

@@ -105,7 +105,7 @@ export default function QuizFormPage() {
 
   const handleGenerateQuiz = async () => {
     setLoading(true);
-    
+
     try {
       // STEP 1: Generate the quiz
       const payload: QuizGenerationPayload = {
@@ -121,8 +121,8 @@ export default function QuizFormPage() {
       };
 
       console.log('Generating quiz with payload:', payload);
-      const response = await api.post('/institution-admin/quizzes/generate', payload);
-      
+      const response = await api.post('/teacher/quizzes/generate', payload);
+
       if (response.data.success) {
         // Extract quiz ID from response
         const quizId = response.data.data.quiz.id;
@@ -136,8 +136,8 @@ export default function QuizFormPage() {
         };
 
         console.log('Assigning quiz with data:', assignmentData);
-        const assignResponse = await api.post('/institution-admin/quizzes/assign', assignmentData);
-        
+        const assignResponse = await api.post('/teacher/quizzes/assign', assignmentData);
+
         if (assignResponse.data.success) {
           console.log('Quiz assigned successfully');
           setCurrentStep('generated');
@@ -306,7 +306,7 @@ export default function QuizFormPage() {
                 <h1 className="text-2xl font-semibold text-gray-900 mb-2">Quiz Generated and Assigned Successfully!</h1>
                 <p className="text-gray-600">Your quiz has been created and assigned to {selectedStudents.length} students.</p>
               </div>
-              
+
               <div className="flex gap-4 justify-center">
                 <button
                   type="button"

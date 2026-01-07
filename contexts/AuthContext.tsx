@@ -32,7 +32,7 @@ interface Institution {
 interface AuthContextType {
   isAuthenticated: boolean;
   institution: Institution | null;
-  login: (email: string, password: string) => Promise<{ success: boolean; message: string }>;
+  login: (name: string, email: string, password: string) => Promise<{ success: boolean; message: string }>;
   logout: () => void;
   loading: boolean;
 }
@@ -86,7 +86,7 @@ const applyInstitutionTheme = (institution: Institution | null) => {
   try {
     const theme = { primary, secondary };
     localStorage.setItem('institution-theme', JSON.stringify(theme));
-  } catch {}
+  } catch { }
 };
 
 // Restore theme from localStorage if present
@@ -106,7 +106,7 @@ const restoreThemeFromStorage = () => {
       root.style.setProperty('--secondary', theme.secondary);
       root.style.setProperty('--secondary-foreground', getContrastingTextColor(theme.secondary));
     }
-  } catch {}
+  } catch { }
 };
 
 const formatInstitutionData = (rawInstitution: unknown): Institution => {
@@ -164,12 +164,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Check if user is logged in on component mount
     const authCookie = Cookies.get('auth');
-    
+
     if (authCookie) {
       try {
         const parsedAuth = JSON.parse(authCookie);
         const { user, token } = parsedAuth;
-        
+
         if (user && token) {
           const formattedInstitution = formatInstitutionData(user);
 
@@ -190,23 +190,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setLoading(false);
   }, []);
 
-  const login = async (email: string, password: string) => {
+  const login = async (name: string, email: string, password: string) => {
     try {
-      const response = await api.post('/institution-admin/auth/login', {
+      const response = await api.post('/teacher/auth/login', {
+        name,
         email,
         password,
+        institutionId: 'cmcx8sm3y0000qe0r6xjq6imo',
       });
 
       if (response.data.success) {
         const { token, institution: institutionData } = response.data.data;
         const formattedInstitution = formatInstitutionData(institutionData);
-        
+
         // Store in both formats for compatibility
         const authData = {
           token,
           user: formattedInstitution
         };
-        
+
         Cookies.set('auth', JSON.stringify(authData), { expires: 7 }); // Main auth cookie
         Cookies.set('auth-token', token, { expires: 7 }); // Token only
         Cookies.set('institution-data', JSON.stringify(formattedInstitution), { expires: 7 }); // Institution data
@@ -215,23 +217,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           localStorage.setItem('auth', JSON.stringify(authData));
           localStorage.setItem('auth-token', token);
           localStorage.setItem('institution-data', JSON.stringify(formattedInstitution));
-        } catch {}
-        
+        } catch { }
+
         setInstitution(formattedInstitution);
         setIsAuthenticated(true);
         // Apply and persist theme colors from login response
         applyInstitutionTheme(formattedInstitution);
-        
+
         return { success: true, message: response.data.message };
       } else {
         return { success: false, message: response.data.message };
       }
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error 
-        ? (error as Error & { response?: { data?: { message?: string } } }).response?.data?.message 
+      const errorMessage = error instanceof Error
+        ? (error as Error & { response?: { data?: { message?: string } } }).response?.data?.message
         : 'Login failed. Please try again.';
-      return { 
-        success: false, 
+      return {
+        success: false,
         message: errorMessage || 'Login failed. Please try again.'
       };
     }
@@ -241,16 +243,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     console.log('=== LOGOUT PROCESS STARTED ===');
     console.log('Current isAuthenticated:', isAuthenticated);
     console.log('Current institution:', institution);
-    
+
     console.log('Removing cookies...');
-    
+
     // Get all cookies before removal for debugging
     console.log('Cookies before removal:', {
       auth: Cookies.get('auth'),
       authToken: Cookies.get('auth-token'),
       institutionData: Cookies.get('institution-data')
     });
-    
+
     // Remove cookies with different path options to ensure they're cleared
     Cookies.remove('auth', { path: '' });
     Cookies.remove('auth', { path: '/' });
@@ -258,20 +260,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     Cookies.remove('auth-token', { path: '/' });
     Cookies.remove('institution-data', { path: '' });
     Cookies.remove('institution-data', { path: '/' });
-    
+
     // Also clear any other potential auth-related cookies
     Cookies.remove('auth');
     Cookies.remove('auth-token');
     Cookies.remove('institution-data');
-    
+
     // Clear localStorage entries
     try {
       localStorage.removeItem('auth');
       localStorage.removeItem('auth-token');
       localStorage.removeItem('institution-data');
       localStorage.removeItem('institution-theme');
-    } catch {}
-    
+    } catch { }
+
     // Reset theme overrides to fall back to CSS defaults
     if (typeof window !== 'undefined') {
       const root = document.documentElement;
@@ -280,18 +282,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       root.style.removeProperty('--secondary');
       root.style.removeProperty('--secondary-foreground');
     }
-    
+
     // Check cookies after removal
     console.log('Cookies after removal:', {
       auth: Cookies.get('auth'),
       authToken: Cookies.get('auth-token'),
       institutionData: Cookies.get('institution-data')
     });
-    
+
     console.log('Setting state...');
     setInstitution(null);
     setIsAuthenticated(false);
-    
+
     console.log('=== LOGOUT PROCESS COMPLETED ===');
     console.log('New isAuthenticated:', false);
     console.log('New institution:', null);

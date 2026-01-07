@@ -116,16 +116,16 @@ export function QuizHistory({ onViewQuiz }: QuizHistoryProps) {
       setLoading(true)
       const allQuizzes: Quiz[] = []
       let currentPageNum = page
-      
+
       // Fetch all pages
       while (true) {
-        const response = await api.get(`/institution-admin/quizzes?page=${currentPageNum}`)
-        
+        const response = await api.get(`/teacher/quizzes?page=${currentPageNum}`)
+
         if (response.data.success) {
           const { quizzes: pageQuizzes, pagination: pagePagination } = response.data.data
           allQuizzes.push(...pageQuizzes)
           setPagination(pagePagination)
-          
+
           // If this is the last page, break
           if (currentPageNum >= pagePagination.totalPages) {
             break
@@ -135,7 +135,7 @@ export function QuizHistory({ onViewQuiz }: QuizHistoryProps) {
           break
         }
       }
-      
+
       setQuizzes(allQuizzes)
     } catch (error) {
       console.error('Error fetching quizzes:', error)
@@ -149,15 +149,15 @@ export function QuizHistory({ onViewQuiz }: QuizHistoryProps) {
     try {
       const allStandards: Standard[] = []
       let currentPageNum = 1
-      
+
       // Fetch all pages of standards
       while (true) {
-        const response = await api.get(`/institution-admin/standards?page=${currentPageNum}`)
-        
+        const response = await api.get(`/teacher/standards?page=${currentPageNum}`)
+
         if (response.data.success) {
           const { standards: pageStandards, pagination: pagePagination } = response.data.data
           allStandards.push(...pageStandards)
-          
+
           // If this is the last page, break
           if (currentPageNum >= pagePagination.totalPages) {
             break
@@ -167,7 +167,7 @@ export function QuizHistory({ onViewQuiz }: QuizHistoryProps) {
           break
         }
       }
-      
+
       setStandards(allStandards)
     } catch (error) {
       console.error('Error fetching standards:', error)
@@ -182,7 +182,7 @@ export function QuizHistory({ onViewQuiz }: QuizHistoryProps) {
 
   const getSectionName = (sectionId: string | null): string => {
     if (!sectionId) return "Not Assigned"
-    
+
     for (const standard of standards) {
       const section = standard.sections.find(s => s.id === sectionId)
       if (section) return section.name
@@ -192,7 +192,7 @@ export function QuizHistory({ onViewQuiz }: QuizHistoryProps) {
 
   const calculateAverageScore = (submissions: Submission[]): string => {
     if (!submissions || submissions.length === 0) return "No submissions"
-    
+
     const totalScore = submissions.reduce((sum, submission) => sum + (submission.score || 0), 0)
     const average = totalScore / submissions.length
     return `${Math.round(average)}%`
@@ -258,8 +258,8 @@ export function QuizHistory({ onViewQuiz }: QuizHistoryProps) {
         <h1 className="text-2xl font-semibold">All Quizzes History ({pagination.totalCount})</h1>
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-          <Input 
-            placeholder="Search quizzes here" 
+          <Input
+            placeholder="Search quizzes here"
             className="pl-10 w-64 border-gray-200 focus:border-[color:var(--primary-500)] focus:ring-[color:var(--primary-500)]"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -299,11 +299,10 @@ export function QuizHistory({ onViewQuiz }: QuizHistoryProps) {
                   <td className="px-6 py-4 text-sm text-gray-600">{getStandardName(quiz.standardId)}</td>
                   <td className="px-6 py-4 text-sm text-gray-600">{getSectionName(quiz.sectionId)}</td>
                   <td className="px-6 py-4 text-sm">
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      quiz.difficulty === 'easy' ? 'bg-[var(--primary-100)] text-[color:var(--primary-800)]' :
-                      quiz.difficulty === 'medium' ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-red-100 text-red-800'
-                    }`}>
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${quiz.difficulty === 'easy' ? 'bg-[var(--primary-100)] text-[color:var(--primary-800)]' :
+                        quiz.difficulty === 'medium' ? 'bg-yellow-100 text-yellow-800' :
+                          'bg-red-100 text-red-800'
+                      }`}>
                       {quiz.difficulty}
                     </span>
                   </td>
@@ -311,8 +310,8 @@ export function QuizHistory({ onViewQuiz }: QuizHistoryProps) {
                   <td className="px-6 py-4 text-sm text-gray-600">{quiz.SubmitQuiz.length}</td>
                   <td className="px-6 py-4 text-sm text-gray-600">{formatDate(quiz.createdAt)}</td>
                   <td className="px-6 py-4">
-                    <Button 
-                      size="sm" 
+                    <Button
+                      size="sm"
                       className="button-primary px-4 py-1 text-sm font-medium rounded"
                       onClick={() => handleViewQuiz(quiz)}
                     >
@@ -331,9 +330,9 @@ export function QuizHistory({ onViewQuiz }: QuizHistoryProps) {
           Showing {filteredQuizzes.length} of {pagination.totalCount} quizzes
         </div>
         <div className="flex gap-2">
-          <Button 
-            variant="outline" 
-            size="sm" 
+          <Button
+            variant="outline"
+            size="sm"
             className="w-8 h-8 p-0"
             disabled={currentPage === 1}
             onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
@@ -343,9 +342,9 @@ export function QuizHistory({ onViewQuiz }: QuizHistoryProps) {
           <span className="px-3 py-1 text-sm">
             Page {currentPage} of {pagination.totalPages}
           </span>
-          <Button 
-            variant="outline" 
-            size="sm" 
+          <Button
+            variant="outline"
+            size="sm"
             className="w-8 h-8 p-0"
             disabled={currentPage === pagination.totalPages}
             onClick={() => setCurrentPage(prev => Math.min(pagination.totalPages, prev + 1))}

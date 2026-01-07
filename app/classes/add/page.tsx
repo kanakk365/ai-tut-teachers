@@ -41,7 +41,7 @@ export default function CreateClassPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!formData.classGrade.trim()) {
       setError('Please select a class grade');
       return;
@@ -52,7 +52,7 @@ export default function CreateClassPage() {
     setSuccess('');
 
     try {
-      const response = await api.post<ApiResponse<{ standard: Standard }>>('/institution-admin/standards', {
+      const response = await api.post<ApiResponse<{ standard: Standard }>>('/teacher/standards', {
         name: formData.classGrade.trim(),
       });
 
@@ -63,7 +63,7 @@ export default function CreateClassPage() {
         }, 2000);
       }
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error && 'response' in err 
+      const errorMessage = err instanceof Error && 'response' in err
         ? (err as Error & { response?: { data?: { message?: string } } }).response?.data?.message || 'Failed to create class'
         : 'Failed to create class';
       setError(errorMessage);
@@ -241,8 +241,8 @@ export default function CreateClassPage() {
                   >
                     Cancel
                   </Button>
-                  <Button 
-                    type="submit" 
+                  <Button
+                    type="submit"
                     disabled={loading || !formData.classGrade.trim()}
                     className="px-10 py-4 h-14 rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-all bg-[color:var(--primary-500)] hover:bg-[color:var(--primary-600)] text-[color:var(--primary-foreground)]"
                   >
