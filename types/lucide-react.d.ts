@@ -43,4 +43,7 @@ declare module "lucide-react" {
   export const Circle: LucideIcon;
   export const ChevronRight: LucideIcon;
   export const EyeOff: LucideIcon;
+  export const AlertTriangle: LucideIcon;
+  export const Video: LucideIcon;
+  export const Play: LucideIcon;
 }

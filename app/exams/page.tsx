@@ -6,6 +6,7 @@ import { StudentList } from "@/components/StudentList"
 import { ExamAssignment } from "@/components/ExamAssignment"
 import { ExamView } from "@/components/exam-view"
 import { ExamHistory } from "@/components/exam-history"
+import { ExamAttempts } from "@/components/exam-attempts"
 
 interface Exam {
   id: string
@@ -74,6 +75,7 @@ export default function ExamsPage() {
   const handleBackToExamForm = () => {
     setCurrentView("exam-assignment")
   }
+
   const handleViewExam = (exam: Exam) => {
     setSelectedExam(exam)
     // Extract grade from standardName or use default
@@ -82,11 +84,24 @@ export default function ExamsPage() {
     const grade = gradeMatch ? parseInt(gradeMatch[1]) : 1
     setSelectedGrade(grade)
     setSelectedSection(exam.classSection.sectionName || "A")
-    setCurrentView("student-list")
+    setCurrentView("exam-details")
+  }
+
+  const handleBackToExamHistory = () => {
+    setSelectedExam(null)
+    setCurrentView("exam-history")
   }
 
   const renderContent = () => {
     switch (currentView) {
+      case "exam-details":
+        return (
+          <ExamAttempts
+            examId={selectedExam?.id || ""}
+            examTitle={selectedExam?.title}
+            onBack={handleBackToExamHistory}
+          />
+        )
       case "student-list":
         return (
           <StudentList
@@ -174,9 +189,9 @@ export default function ExamsPage() {
         )
       case "exam-created":
         return (
-          <ExamView 
-            onCancel={() => setCurrentView("student-list")} 
-            onEdit={() => setCurrentView("exam-assignment")} 
+          <ExamView
+            onCancel={() => setCurrentView("student-list")}
+            onEdit={() => setCurrentView("exam-assignment")}
           />
         )
       case "exam-history":
@@ -197,3 +212,4 @@ export default function ExamsPage() {
     </div>
   )
 }
+

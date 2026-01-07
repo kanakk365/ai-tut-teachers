@@ -87,7 +87,6 @@ export function useSidebar() {
 const navigationItems = [
   { icon: GraduationCap, label: "Class", href: "/classes" },
   { icon: Users, label: "Students", href: "/students" },
-  { icon: User, label: "Teachers", href: "/teachers" },
   { icon: FlaskConical, label: "Project Lab", href: "/projects" },
   { icon: FileQuestion, label: "Quizzes", href: "/quizzes" },
   { icon: FileText, label: "Exams", href: "/exams" },
