@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Search, ChevronDown, ChevronUp } from "lucide-react"
+import { Search, ChevronDown, ChevronUp, AlertTriangle, Video, Play } from "lucide-react"
 import { useState, useEffect, useCallback } from "react"
 import api from "@/lib/axios"
 
@@ -24,6 +24,31 @@ interface Question {
   options: Option[]
 }
 
+interface QuizVideo {
+  id: string
+  userId: string
+  quizId: string | null
+  examId: string | null
+  videoType: string
+  s3Key: string
+  s3Url: string
+  fileSize: number
+  duration: number
+  createdAt: string
+  updatedAt: string
+  user: {
+    id: string
+    firstName: string
+    lastName: string
+    email: string
+  }
+  quiz: {
+    id: string
+    title: string
+  } | null
+  exam: any | null
+}
+
 interface Submission {
   id: string
   score: number
@@ -31,6 +56,7 @@ interface Submission {
   correctAnswers: number
   timeTaken: number
   submittedAt: string
+  is_studentCheated: boolean
   user: {
     id: string
     firstName: string
@@ -38,6 +64,10 @@ interface Submission {
     email: string
   }
   answers: Answer[]
+  videos: QuizVideo[]
+  cheatingStatus: {
+    is_studentCheated: boolean
+  }
 }
 
 interface Quiz {
@@ -71,6 +101,16 @@ export function StudentAttempts({ quizTitle, quiz, onBack }: StudentAttemptsProp
       console.error('Error fetching quiz details:', error)
     }
   }, [])
+
+  // Format duration helper
+  const formatDuration = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60)
+    const remainingSeconds = seconds % 60
+    if (minutes > 0) {
+      return `${minutes}m ${remainingSeconds}s`
+    }
+    return `${remainingSeconds}s`
+  }
 
   useEffect(() => {
     if (quiz?.id) {
@@ -158,6 +198,14 @@ export function StudentAttempts({ quizTitle, quiz, onBack }: StudentAttemptsProp
               </h1>
             </div>
           </div>
+
+          {/* Cheating Status Badge */}
+          {selectedSubmission.is_studentCheated && (
+            <div className="flex items-center gap-2 px-4 py-2 bg-red-100 text-red-800 rounded-lg">
+              <AlertTriangle className="h-5 w-5" />
+              <span className="font-medium">Cheating Detected</span>
+            </div>
+          )}
         </div>
 
         {/* Overview Section */}
@@ -216,11 +264,22 @@ export function StudentAttempts({ quizTitle, quiz, onBack }: StudentAttemptsProp
                     <div className="font-medium">{formatDate(selectedSubmission.submittedAt)}</div>
                   </div>
                   <div>
+                    <div className="text-sm text-gray-600">Cheating Status</div>
+                    <div className="font-medium">
+                      <span className={`px-3 py-1 rounded-full text-sm font-medium ${selectedSubmission.is_studentCheated
+                        ? 'bg-red-100 text-red-800'
+                        : 'bg-[var(--primary-100)] text-[color:var(--primary-800)]'
+                        }`}>
+                        {selectedSubmission.is_studentCheated ? 'Cheating Detected' : 'No Issues'}
+                      </span>
+                    </div>
+                  </div>
+                  <div>
                     <div className="text-sm text-gray-600">Status</div>
                     <div className="font-medium">
                       <span className={`px-3 py-1 rounded-full text-sm font-medium ${(selectedSubmission.score || 0) >= 60 ? 'bg-[var(--primary-100)] text-[color:var(--primary-800)]' : 'bg-red-100 text-red-800'
                         }`}>
-                        Submitted
+                        {(selectedSubmission.score || 0) >= 60 ? 'Passed' : 'Failed'}
                       </span>
                     </div>
                   </div>
@@ -229,6 +288,49 @@ export function StudentAttempts({ quizTitle, quiz, onBack }: StudentAttemptsProp
             </div>
           )}
         </div>
+
+        {/* Videos Section */}
+        {selectedSubmission.videos && selectedSubmission.videos.length > 0 && (
+          <div className="bg-white rounded-lg border border-gray-200 mb-4">
+            <div className="p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <Video className="h-5 w-5 text-[color:var(--primary-600)]" />
+                <h2 className="text-lg font-medium">Recording Videos ({selectedSubmission.videos.length})</h2>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {selectedSubmission.videos.map((video) => (
+                  <div key={video.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="p-2 bg-[var(--primary-100)] rounded-lg">
+                        <Play className="h-5 w-5 text-[color:var(--primary-600)]" />
+                      </div>
+                      <div>
+                        <div className="font-medium text-sm">
+                          {video.videoType === 'SCREEN' ? 'Screen Recording' : video.videoType}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          Duration: {formatDuration(video.duration)}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-xs text-gray-500 mb-3">
+                      Recorded: {formatDate(video.createdAt)}
+                    </div>
+                    <a
+                      href={video.s3Url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-white bg-[var(--primary-500)] hover:bg-[var(--primary-600)] rounded-lg transition-colors w-full justify-center"
+                    >
+                      <Play className="h-4 w-4" />
+                      Watch Video
+                    </a>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Questions and Answers Section */}
         <div className="bg-white rounded-lg border border-gray-200">
@@ -314,8 +416,8 @@ export function StudentAttempts({ quizTitle, quiz, onBack }: StudentAttemptsProp
                   <th className="text-left px-6 py-4 text-sm font-medium text-gray-600">Email</th>
                   <th className="text-left px-6 py-4 text-sm font-medium text-gray-600">Score (%)</th>
                   <th className="text-left px-6 py-4 text-sm font-medium text-gray-600">Correct Answers</th>
-                  <th className="text-left px-6 py-4 text-sm font-medium text-gray-600">Time Taken</th>
-                  <th className="text-left px-6 py-4 text-sm font-medium text-gray-600">Submitted At</th>
+                  <th className="text-left px-6 py-4 text-sm font-medium text-gray-600">Cheating</th>
+                  <th className="text-left px-6 py-4 text-sm font-medium text-gray-600">Videos</th>
                   <th className="text-left px-6 py-4 text-sm font-medium text-gray-600">Status</th>
                   <th className="text-left px-6 py-4 text-sm font-medium text-gray-600">Action</th>
                 </tr>
@@ -334,10 +436,28 @@ export function StudentAttempts({ quizTitle, quiz, onBack }: StudentAttemptsProp
                     <td className="px-6 py-4 text-sm text-gray-600">
                       {submission.correctAnswers || 0}/{submission.totalQuestions || 0}
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-600">
-                      {submission.timeTaken || 0} min{(submission.timeTaken || 0) !== 1 ? 's' : ''}
+                    <td className="px-6 py-4 text-sm">
+                      {submission.is_studentCheated ? (
+                        <span className="flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                          <AlertTriangle className="h-3 w-3" />
+                          Yes
+                        </span>
+                      ) : (
+                        <span className="px-2 py-1 rounded-full text-xs font-medium bg-[var(--primary-100)] text-[color:var(--primary-800)]">
+                          No
+                        </span>
+                      )}
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-600">{formatDate(submission.submittedAt)}</td>
+                    <td className="px-6 py-4 text-sm text-gray-600">
+                      {submission.videos && submission.videos.length > 0 ? (
+                        <span className="flex items-center gap-1 text-[color:var(--primary-600)]">
+                          <Video className="h-4 w-4" />
+                          {submission.videos.length}
+                        </span>
+                      ) : (
+                        <span className="text-gray-400">None</span>
+                      )}
+                    </td>
                     <td className="px-6 py-4 text-sm">
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${(submission.score || 0) >= 60 ? 'bg-[var(--primary-100)] text-[color:var(--primary-800)]' : 'bg-red-100 text-red-800'
                         }`}>
@@ -375,6 +495,6 @@ export function StudentAttempts({ quizTitle, quiz, onBack }: StudentAttemptsProp
           </div>
         )}
       </div>
-    </div>
+    </div >
   )
 }
