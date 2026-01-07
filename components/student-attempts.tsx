@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Search, ChevronDown, ChevronUp, AlertTriangle, Video, Play, Star, Send, Loader2 } from "lucide-react"
+import { Search, ChevronDown, ChevronUp, AlertTriangle, Video, Play, Star, Send, Loader2, Trash2 } from "lucide-react"
 import { useState, useEffect, useCallback } from "react"
 import api from "@/lib/axios"
 import { useToast } from "@/hooks/use-toast"
@@ -97,6 +97,7 @@ export function StudentAttempts({ quizTitle, quiz, onBack }: StudentAttemptsProp
   const [feedbackRating, setFeedbackRating] = useState(0)
   const [submittingFeedback, setSubmittingFeedback] = useState(false)
   const [feedbackExpanded, setFeedbackExpanded] = useState(true)
+  const [deletingVideoId, setDeletingVideoId] = useState<string | null>(null)
   const { toast } = useToast()
 
   const fetchQuizDetails = useCallback(async (quizId: string) => {
@@ -372,18 +373,52 @@ export function StudentAttempts({ quizTitle, quiz, onBack }: StudentAttemptsProp
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {selectedSubmission.videos.map((video) => (
                   <div key={video.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="p-2 bg-[var(--primary-100)] rounded-lg">
-                        <Play className="h-5 w-5 text-[color:var(--primary-600)]" />
-                      </div>
-                      <div>
-                        <div className="font-medium text-sm">
-                          {video.videoType === 'SCREEN' ? 'Screen Recording' : video.videoType}
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-[var(--primary-100)] rounded-lg">
+                          <Play className="h-5 w-5 text-[color:var(--primary-600)]" />
                         </div>
-                        <div className="text-xs text-gray-500">
-                          Duration: {formatDuration(video.duration)}
+                        <div>
+                          <div className="font-medium text-sm">
+                            {video.videoType === 'SCREEN' ? 'Screen Recording' : video.videoType}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            Duration: {formatDuration(video.duration)}
+                          </div>
                         </div>
                       </div>
+                      <button
+                        type="button"
+                        onClick={async (e) => {
+                          e.stopPropagation()
+                          if (!confirm('Are you sure you want to delete this video?')) return
+                          try {
+                            setDeletingVideoId(video.id)
+                            const response = await api.delete(`/teacher/videos/${video.id}`)
+                            if (response.data.success) {
+                              toast({ title: 'Success', description: 'Video deleted successfully' })
+                              // Remove video from local state
+                              setSelectedSubmission(prev => prev ? {
+                                ...prev,
+                                videos: prev.videos.filter(v => v.id !== video.id)
+                              } : null)
+                            }
+                          } catch (err) {
+                            console.error('Error deleting video:', err)
+                            toast({ title: 'Error', description: 'Failed to delete video', variant: 'destructive' })
+                          } finally {
+                            setDeletingVideoId(null)
+                          }
+                        }}
+                        disabled={deletingVideoId === video.id}
+                        className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+                      >
+                        {deletingVideoId === video.id ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Trash2 className="h-4 w-4" />
+                        )}
+                      </button>
                     </div>
                     <div className="text-xs text-gray-500 mb-3">
                       Recorded: {formatDate(video.createdAt)}
