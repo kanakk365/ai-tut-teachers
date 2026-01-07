@@ -196,7 +196,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         name,
         email,
         password,
-        institutionId: 'cmcx8sm3y0000qe0r6xjq6imo',
+        institutionId: 'cmk4kyn3l003wskba7nl7um9u',
       });
 
       if (response.data.success) {

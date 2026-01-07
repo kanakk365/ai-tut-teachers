@@ -24,15 +24,20 @@ export default function LoginPage() {
     setLoading(true);
     setError('');
 
-    const result = await login(name, email, password);
+    try {
+      const result = await login(name, email, password);
 
-    if (result.success) {
-      router.push('/');
-    } else {
-      setError(result.message);
+      if (result.success) {
+        router.push('/');
+      } else {
+        setError(result.message);
+      }
+    } catch (err) {
+      console.error('Login error:', err);
+      setError('An unexpected error occurred. Please try again.');
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   return (
