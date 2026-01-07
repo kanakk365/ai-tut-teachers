@@ -98,6 +98,14 @@ interface Class {
   sections: string;
 }
 
+interface Teacher {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  isActive: boolean;
+}
+
 const gradeOptions = [
   '1st Grade',
   '2nd Grade',
@@ -133,6 +141,16 @@ export default function ClassesPage() {
   const [sectionGradeName, setSectionGradeName] = useState('');
   const [newSectionName, setNewSectionName] = useState('');
   const [addingSection, setAddingSection] = useState(false);
+
+  // Teacher Assignment State
+  const [showAssignTeacherModal, setShowAssignTeacherModal] = useState(false);
+  const [assignTeacherClass, setAssignTeacherClass] = useState<{id: string, name: string} | null>(null);
+  const [teachers, setTeachers] = useState<Teacher[]>([]);
+  const [teacherSearch, setTeacherSearch] = useState('');
+  const [selectedTeacherId, setSelectedTeacherId] = useState<string | null>(null);
+  const [selectedAssignSections, setSelectedAssignSections] = useState<string[]>([]);
+  const [loadingTeachers, setLoadingTeachers] = useState(false);
+  const [assigningTeacher, setAssigningTeacher] = useState(false);
 
   // Fetch all students for a specific standard and section
   const fetchStudentsForSection = useCallback(async (standardName: string, sectionName: string): Promise<number> => {
@@ -403,6 +421,108 @@ export default function ClassesPage() {
     }
   };
 
+  // Fetch teachers for assignment modal
+  const fetchTeachers = useCallback(async (search = '') => {
+    try {
+      setLoadingTeachers(true);
+      let url = `/institution-admin/teachers?page=1&limit=50`; // Fetch first 50 for now, can implement infinite scroll later
+      if (search.trim()) {
+        url += `&search=${encodeURIComponent(search.trim())}`;
+      }
+      
+      const response = await api.get<ApiResponse<{ teachers: Teacher[] }>>(url); // Adjust response type if needed
+      
+      if (response.data.success) {
+        setTeachers(response.data.data.teachers);
+      }
+    } catch (err) {
+      console.error('Error fetching teachers:', err);
+      // Fail silently for search, or show toast
+    } finally {
+      setLoadingTeachers(false);
+    }
+  }, []);
+
+  // Debounced search for teachers
+  useEffect(() => {
+    if (showAssignTeacherModal) {
+      const timer = setTimeout(() => {
+        fetchTeachers(teacherSearch);
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [teacherSearch, showAssignTeacherModal, fetchTeachers]);
+
+  const openAssignTeacherModal = (classId: string, className: string) => {
+    setAssignTeacherClass({ id: classId, name: className });
+    setShowAssignTeacherModal(true);
+    setTeacherSearch('');
+    setSelectedTeacherId(null);
+    setSelectedAssignSections([]);
+    setError('');
+    setSuccess('');
+    fetchTeachers();
+  };
+
+  const closeAssignTeacherModal = () => {
+    setShowAssignTeacherModal(false);
+    setAssignTeacherClass(null);
+    setTeacherSearch('');
+    setSelectedTeacherId(null);
+    setSelectedAssignSections([]);
+  };
+
+  const toggleAssignSection = (sectionId: string) => {
+    setSelectedAssignSections(prev => 
+      prev.includes(sectionId) 
+        ? prev.filter(s => s !== sectionId)
+        : [...prev, sectionId]
+    );
+  };
+
+  const handleAssignTeacher = async () => {
+    if (!selectedTeacherId || !assignTeacherClass || selectedAssignSections.length === 0) {
+      setError('Please select a teacher and at least one section');
+      return;
+    }
+
+    setAssigningTeacher(true);
+    setError('');
+    setSuccess('');
+
+    try {
+      const assignments = selectedAssignSections.map(sectionId => ({
+        standardId: assignTeacherClass.id,
+        sectionId: sectionId
+      }));
+
+      const payload = {
+        assignments
+      };
+
+      const response = await api.post(
+        `/institution-admin/teachers/${selectedTeacherId}/assign-sections`, 
+        payload
+      );
+
+      setSuccess(`Teacher assigned successfully to ${assignTeacherClass.name} sections!`);
+      
+      // Close modal after short delay
+      setTimeout(() => {
+        closeAssignTeacherModal();
+      }, 1500);
+
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error && 'response' in err 
+        ? (err as Error & { response?: { data?: { message?: string } } }).response?.data?.message || 'Failed to assign teacher'
+        : 'Failed to assign teacher';
+      setError(errorMessage);
+    } finally {
+      setAssigningTeacher(false);
+    }
+  };
+
+
   const toggleSection = (section: string) => {
     setSelectedSections(prev => 
       prev.includes(section) 
@@ -645,6 +765,135 @@ export default function ClassesPage() {
             </div>
           )}
 
+          {/* Assign Teacher Modal */}
+          {showAssignTeacherModal && assignTeacherClass && (
+            <div className="fixed inset-0 backdrop-blur-md bg-black/30 flex items-center justify-center z-50 p-4">
+              <div className="bg-white/95 backdrop-blur-lg rounded-3xl p-8 shadow-2xl border border-white/20 max-w-2xl w-full mx-4 transform transition-all duration-300 ease-out flex flex-col max-h-[90vh]">
+                <div className="flex items-center justify-between mb-6 flex-shrink-0">
+                  <h3 className="text-3xl font-bold bg-gradient-to-r from-[color:var(--primary-500)] to-[color:var(--primary-600)] bg-clip-text text-transparent flex items-center">
+                    <span className="mr-4 text-4xl">👨‍🏫</span>
+                    Assign Teacher - {assignTeacherClass.name}
+                  </h3>
+                  <button
+                    type="button"
+                    onClick={closeAssignTeacherModal}
+                    className="text-gray-400 hover:text-gray-600 text-xl font-bold w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100/50 transition-all duration-200 backdrop-blur-sm"
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                <div className="space-y-6 overflow-y-auto pr-2 custom-scrollbar flex-1">
+                  {/* Teacher Selection */}
+                  <div>
+                    <label className="block text-sm font-bold text-gray-800 mb-3">
+                      Select Teacher
+                    </label>
+                    <div className="relative mb-3">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                      <Input
+                        placeholder="Search teachers by name..."
+                        value={teacherSearch}
+                        onChange={(e) => setTeacherSearch(e.target.value)}
+                        className="pl-10 w-full border-gray-300 rounded-xl"
+                      />
+                    </div>
+                    
+                    <div className="border rounded-xl overflow-hidden max-h-48 overflow-y-auto bg-white shadow-inner">
+                      {loadingTeachers ? (
+                         <div className="p-4 text-center text-gray-500">Loading teachers...</div>
+                      ) : teachers.length === 0 ? (
+                        <div className="p-4 text-center text-gray-500">No teachers found.</div>
+                      ) : (
+                        teachers.map(teacher => (
+                          <div 
+                            key={teacher.id}
+                            onClick={() => setSelectedTeacherId(teacher.id)}
+                            className={`p-3 cursor-pointer flex items-center justify-between transition-colors ${
+                              selectedTeacherId === teacher.id 
+                                ? 'bg-[color:var(--primary-50)] border-l-4 border-[color:var(--primary-500)]' 
+                                : 'hover:bg-gray-50 border-l-4 border-transparent'
+                            }`}
+                          >
+                            <div>
+                              <p className="font-medium text-gray-800">{teacher.firstName} {teacher.lastName}</p>
+                              <p className="text-sm text-gray-500">{teacher.email}</p>
+                            </div>
+                            {selectedTeacherId === teacher.id && (
+                              <span className="text-[color:var(--primary-600)] font-bold">✓</span>
+                            )}
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Section Selection */}
+                  <div>
+                    <label className="block text-sm font-bold text-gray-800 mb-3">
+                      Select Sections
+                    </label>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                      {sections
+                        .filter(s => s.standardId === assignTeacherClass.id)
+                        .map(section => (
+                          <button
+                            key={section.id}
+                            type="button"
+                            onClick={() => toggleAssignSection(section.id)}
+                            className={`py-3 px-4 rounded-xl border-2 font-bold transition-all duration-200 text-left flex items-center justify-between ${
+                              selectedAssignSections.includes(section.id)
+                                ? 'bg-[color:var(--primary-50)] border-[color:var(--primary-500)] text-[color:var(--primary-800)]'
+                                : 'bg-white text-gray-700 border-gray-200 hover:border-gray-300'
+                            }`}
+                          >
+                            Section {section.name}
+                            {selectedAssignSections.includes(section.id) && (
+                              <span className="text-[color:var(--primary-600)] text-lg">✓</span>
+                            )}
+                          </button>
+                        ))
+                      }
+                      {sections.filter(s => s.standardId === assignTeacherClass.id).length === 0 && (
+                        <p className="col-span-3 text-sm text-gray-500">No sections found for this class.</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex space-x-4 mt-8 pt-4 border-t border-gray-100 flex-shrink-0">
+                  <button
+                    type="button"
+                    onClick={handleAssignTeacher}
+                    disabled={assigningTeacher || !selectedTeacherId || selectedAssignSections.length === 0}
+                    className="flex-1 bg-gradient-to-r from-[color:var(--primary-500)] to-[color:var(--primary-600)] text-[color:var(--primary-foreground)] py-4 px-6 rounded-2xl font-bold hover:from-[color:var(--primary-600)] hover:to-[color:var(--primary-700)] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-xl transform hover:scale-105 disabled:hover:scale-100 flex items-center justify-center backdrop-blur-sm"
+                  >
+                    {assigningTeacher ? (
+                      <>
+                        <span className="animate-spin rounded-full h-5 w-5 border-b-2 border-[color:var(--primary-foreground)] mr-3"></span>
+                        Assigning...
+                      </>
+                    ) : (
+                      <>
+                        <span className="mr-3 text-lg">✅</span>
+                        Assign Teacher
+                      </>
+                    )}
+                  </button>
+                  
+                  <button
+                    type="button"
+                    onClick={closeAssignTeacherModal}
+                    disabled={assigningTeacher}
+                    className="px-8 py-4 border-2 border-gray-300 text-gray-700 rounded-2xl hover:bg-gray-50/80 transition-all duration-300 font-bold disabled:opacity-50 backdrop-blur-sm bg-white/80 shadow-lg transform hover:scale-105 disabled:hover:scale-100"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Table */}
           <div className="overflow-x-auto">
             {loading ? (
@@ -695,6 +944,14 @@ export default function ClassesPage() {
                               className="button-primary px-4 py-2 rounded-lg shadow-sm"
                             >
                               Add Section
+                            </Button>
+                            <Button
+                              variant="secondary"
+                              size="sm"
+                              onClick={() => openAssignTeacherModal(row.id, row.grade)}
+                              className="button-primary px-4 py-2 rounded-lg shadow-sm"
+                            >
+                              Assign Teacher
                             </Button>
                           </div>
                         </td>
