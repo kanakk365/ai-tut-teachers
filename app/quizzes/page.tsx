@@ -58,6 +58,7 @@ interface Submission {
   correctAnswers: number
   timeTaken: number
   submittedAt: string
+  is_studentCheated: boolean
   user: {
     id: string
     firstName: string
@@ -65,6 +66,33 @@ interface Submission {
     email: string
   }
   answers: Answer[]
+  videos: {
+    id: string
+    userId: string
+    quizId: string | null
+    examId: string | null
+    videoType: string
+    s3Key: string
+    s3Url: string
+    fileSize: number
+    duration: number
+    createdAt: string
+    updatedAt: string
+    user: {
+      id: string
+      firstName: string
+      lastName: string
+      email: string
+    }
+    quiz: {
+      id: string
+      title: string
+    } | null
+    exam: any | null
+  }[]
+  cheatingStatus: {
+    is_studentCheated: boolean
+  }
 }
 
 export default function QuizzesPage() {
@@ -102,9 +130,9 @@ export default function QuizzesPage() {
         )
       case "quiz-created":
         return (
-          <ExamView 
-            onCancel={() => setCurrentView("student-list")} 
-            onEdit={() => setCurrentView("quiz-assignment")} 
+          <ExamView
+            onCancel={() => setCurrentView("student-list")}
+            onEdit={() => setCurrentView("quiz-assignment")}
           />
         )
       case "student-attempts":

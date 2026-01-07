@@ -54,6 +54,7 @@ interface Submission {
   correctAnswers: number
   timeTaken: number
   submittedAt: string
+  is_studentCheated: boolean
   user: {
     id: string
     firstName: string
@@ -61,6 +62,33 @@ interface Submission {
     email: string
   }
   answers: Answer[]
+  videos: {
+    id: string
+    userId: string
+    quizId: string | null
+    examId: string | null
+    videoType: string
+    s3Key: string
+    s3Url: string
+    fileSize: number
+    duration: number
+    createdAt: string
+    updatedAt: string
+    user: {
+      id: string
+      firstName: string
+      lastName: string
+      email: string
+    }
+    quiz: {
+      id: string
+      title: string
+    } | null
+    exam: any | null
+  }[]
+  cheatingStatus: {
+    is_studentCheated: boolean
+  }
 }
 
 interface Standard {
@@ -300,8 +328,8 @@ export function QuizHistory({ onViewQuiz }: QuizHistoryProps) {
                   <td className="px-6 py-4 text-sm text-gray-600">{getSectionName(quiz.sectionId)}</td>
                   <td className="px-6 py-4 text-sm">
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${quiz.difficulty === 'easy' ? 'bg-[var(--primary-100)] text-[color:var(--primary-800)]' :
-                        quiz.difficulty === 'medium' ? 'bg-yellow-100 text-yellow-800' :
-                          'bg-red-100 text-red-800'
+                      quiz.difficulty === 'medium' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-red-100 text-red-800'
                       }`}>
                       {quiz.difficulty}
                     </span>
