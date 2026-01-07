@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react"
 import { ExamView } from "@/components/exam-view"
 import { useRouter } from "next/navigation"
-import { useAuth } from "@/contexts/AuthContext"
 import api from "@/lib/api"
 
 interface Student {
@@ -70,7 +69,6 @@ interface StoredQuizFormData {
 
 export default function CustomQuizConfirmationPage() {
   const router = useRouter()
-  const { institution } = useAuth()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
@@ -118,8 +116,8 @@ export default function CustomQuizConfirmationPage() {
   }, [router])
 
   const handleAssignQuiz = async () => {
-    if (!createdQuiz || selectedStudents.length === 0 || !institution) {
-      setError('Missing quiz data, no students selected, or institution information')
+    if (!createdQuiz || selectedStudents.length === 0) {
+      setError('Missing quiz data or no students selected')
       return
     }
 
@@ -167,11 +165,19 @@ export default function CustomQuizConfirmationPage() {
       const createdQuizData = createResponse.data.data
       console.log('Created quiz response:', createdQuizData)
 
+      // Get institution ID from teacher profile
+      const profileResponse = await api.get('/teacher/profile')
+      if (!profileResponse.data.success || !profileResponse.data.data.institution?.id) {
+        setError('Failed to get institution information')
+        return
+      }
+      const institutionId = profileResponse.data.data.institution.id
+
       // Now assign the created quiz to students using the new endpoint
       const assignmentData = {
         quizId: createdQuizData.quizId,
         studentIds: selectedStudents.map(student => student.id),
-        institutionId: institution.id
+        institutionId: institutionId
       }
 
       console.log('Assigning quiz with data:', assignmentData)

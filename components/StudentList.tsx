@@ -25,7 +25,7 @@ interface Student {
 
 interface StudentsResponse {
   students: Student[]
-  pagination: {
+  pagination?: {
     currentPage: number
     totalPages: number
     totalCount: number
@@ -64,14 +64,15 @@ export function StudentList({ standardName, sectionName, examTitle, onAssignExam
 
       while (hasMorePages) {
         const response = await api.get<ApiResponse<StudentsResponse>>(
-          `/teacher/students?page=${currentPage}&standardName=${encodeURIComponent(standardName)}&sectionName=${encodeURIComponent(sectionName)}`
+          `/teacher/students?page=${currentPage}&limit=100&standardName=${encodeURIComponent(standardName)}&sectionName=${encodeURIComponent(sectionName)}`
         )
 
         if (response.data.success) {
           allStudents = [...allStudents, ...response.data.data.students]
 
-          // Check if there are more pages
-          if (currentPage >= response.data.data.pagination.totalPages) {
+          // Check if there are more pages (handle case where pagination is not present)
+          const pagination = response.data.data.pagination
+          if (!pagination || currentPage >= pagination.totalPages) {
             hasMorePages = false
           } else {
             currentPage++

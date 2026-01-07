@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react"
 import { ExamView } from "@/components/exam-view"
 import { useRouter } from "next/navigation"
-import { useAuth } from "@/contexts/AuthContext"
 import api from "@/lib/api"
 
 interface Student {
@@ -45,7 +44,6 @@ interface CreatedExam {
 
 export default function CustomExamConfirmationPage() {
   const router = useRouter()
-  const { institution } = useAuth()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
@@ -144,16 +142,19 @@ export default function CustomExamConfirmationPage() {
       const createdExamData = createResponse.data.data
       console.log('Created exam response:', createdExamData)
 
-      // STEP 2: Now assign the created exam to students
-      if (!institution?.id) {
-        setError('Institution information not available')
+      // STEP 2: Get institution ID from teacher profile
+      const profileResponse = await api.get('/teacher/profile')
+      if (!profileResponse.data.success || !profileResponse.data.data.institution?.id) {
+        setError('Failed to get institution information')
         return
       }
+      const institutionId = profileResponse.data.data.institution.id
 
+      // STEP 3: Now assign the created exam to students
       const assignmentData = {
         examId: createdExamData.examId,
         studentIds: selectedStudents.map(student => student.id),
-        institutionId: institution.id
+        institutionId: institutionId
       }
 
       console.log('Assigning exam with data:', assignmentData)
@@ -161,7 +162,7 @@ export default function CustomExamConfirmationPage() {
       const assignResponse = await api.post('/teacher/custom-exams/assign', assignmentData)
 
       if (assignResponse.data.success) {
-        setSuccess(`Exam created and assigned successfully to ${assignResponse.data.data.assignedCount} students`)
+        setSuccess(`Exam created and assigned successfully to ${assignResponse.data.data.assignedCount || selectedStudents.length} students`)
 
         // Clear sessionStorage
         sessionStorage.removeItem('customExamSelectedStudents')

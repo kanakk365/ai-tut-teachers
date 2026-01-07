@@ -13,12 +13,12 @@ interface Student {
   email: string;
   firstName: string;
   lastName: string;
-  dob: string;
-  gender: string;
-  phone: string;
+  dob?: string;
+  gender?: string;
+  phone?: string;
   photoUrl?: string;
-  isActive: boolean;
-  institution: {
+  isActive?: boolean;
+  institution?: {
     id: string;
     name: string;
   };
@@ -38,7 +38,7 @@ interface StudentsResponse {
   message: string;
   data: {
     students: Student[];
-    pagination: {
+    pagination?: {
       currentPage: number;
       totalPages: number;
       totalCount: number;
@@ -84,14 +84,15 @@ export default function CustomQuizStudentsPage() {
 
       while (hasMorePages) {
         const response = await api.get<StudentsResponse>(
-          `/teacher/students?page=${currentPage}&limit=10&standardName=${stdName}&sectionName=${secName}`
+          `/teacher/students?page=${currentPage}&limit=100&standardName=${encodeURIComponent(stdName)}&sectionName=${encodeURIComponent(secName)}`
         );
 
         if (response.data.success) {
           allStudents = [...allStudents, ...response.data.data.students];
 
-          // Check if there are more pages
-          if (currentPage >= response.data.data.pagination.totalPages) {
+          // Check if there are more pages (handle case where pagination is not present)
+          const pagination = response.data.data.pagination;
+          if (!pagination || currentPage >= pagination.totalPages) {
             hasMorePages = false;
           } else {
             currentPage++;
@@ -103,8 +104,8 @@ export default function CustomQuizStudentsPage() {
       }
 
       setStudents(allStudents);
-    } catch (error) {
-      console.error('Error fetching students:', error);
+    } catch (err) {
+      console.error('Error fetching students:', err);
       setError('Failed to fetch students');
     } finally {
       setLoading(false);
@@ -240,8 +241,8 @@ export default function CustomQuizStudentsPage() {
                     <TableCell className="py-6 pl-6 text-[color:var(--primary-800)]">{student.firstName} {student.lastName}</TableCell>
                     <TableCell className="text-[color:var(--primary-700)]">{student.standard.name}</TableCell>
                     <TableCell className="text-[color:var(--primary-700)]">{student.email}</TableCell>
-                    <TableCell className="text-[color:var(--primary-700)]">{student.phone}</TableCell>
-                    <TableCell className="text-[color:var(--primary-700)]">{student.isActive ? 'Active' : 'Inactive'}</TableCell>
+                    <TableCell className="text-[color:var(--primary-700)]">{student.phone || '-'}</TableCell>
+                    <TableCell className="text-[color:var(--primary-700)]">{student.isActive !== false ? 'Active' : 'Inactive'}</TableCell>
                     <TableCell className="pr-6">
                       <div className="flex justify-end">
                         <button

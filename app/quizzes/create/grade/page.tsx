@@ -4,86 +4,100 @@ import { useRouter } from "next/navigation"
 import { useState, useEffect, useCallback } from "react"
 import api from "@/lib/axios"
 
-interface Standard {
-  id: string
-  name: string
-  institutionId: string
-  createdAt: string
-  updatedAt: string
-  sections: Section[]
+interface AssignedSection {
+  teacherSectionId: string
+  sectionId: string
+  sectionName: string
+  standardId: string
+  standardName: string
 }
 
-interface Section {
+interface TeacherProfile {
   id: string
-  name: string
+  firstName: string
+  lastName: string
+  email: string
+  isActive: boolean
   createdAt: string
+  institution: {
+    id: string
+    name: string
+  }
+  assignedSections: AssignedSection[]
 }
 
-interface StandardsResponse {
+interface ApiResponse<T> {
   statusCode: number
   success: boolean
   message: string
-  data: {
-    standards: Standard[]
-    pagination: {
-      currentPage: number
-      totalPages: number
-      totalCount: number
-      limit: number
-    }
-  }
+  data: T
+}
+
+// Group sections by standard for display
+interface GroupedStandard {
+  standardId: string
+  standardName: string
+  sections: AssignedSection[]
 }
 
 export default function QuizGradeSelectionPage() {
   const router = useRouter()
-  const [standards, setStandards] = useState<Standard[]>([])
+  const [groupedStandards, setGroupedStandards] = useState<GroupedStandard[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [selectedStandard, setSelectedStandard] = useState<Standard | null>(null)
+  const [selectedStandard, setSelectedStandard] = useState<GroupedStandard | null>(null)
 
-  const fetchAllStandards = useCallback(async () => {
+  const fetchTeacherProfile = useCallback(async () => {
     try {
       setLoading(true)
-      let allStandards: Standard[] = []
-      let currentPage = 1
-      let hasMorePages = true
+      const response = await api.get<ApiResponse<TeacherProfile>>('/teacher/profile')
 
-      while (hasMorePages) {
-        const response = await api.get<StandardsResponse>(`/teacher/standards?page=${currentPage}`)
+      if (response.data.success) {
+        // Group sections by standard
+        const grouped: { [key: string]: GroupedStandard } = {}
 
-        if (response.data.success) {
-          allStandards = [...allStandards, ...response.data.data.standards]
-
-          // Check if there are more pages
-          if (currentPage >= response.data.data.pagination.totalPages) {
-            hasMorePages = false
-          } else {
-            currentPage++
+        response.data.data.assignedSections.forEach((section) => {
+          if (!grouped[section.standardId]) {
+            grouped[section.standardId] = {
+              standardId: section.standardId,
+              standardName: section.standardName,
+              sections: []
+            }
           }
-        } else {
-          hasMorePages = false
-          setError('Failed to fetch standards')
-        }
-      }
+          grouped[section.standardId].sections.push(section)
+        })
 
-      setStandards(allStandards)
-    } catch (error) {
-      console.error('Error fetching standards:', error)
-      setError('Failed to fetch standards')
+        setGroupedStandards(Object.values(grouped))
+      } else {
+        setError('Failed to fetch assigned classes')
+      }
+    } catch (err) {
+      console.error('Error fetching teacher profile:', err)
+      setError('Failed to fetch assigned classes')
     } finally {
       setLoading(false)
     }
   }, [])
 
   useEffect(() => {
-    fetchAllStandards()
-  }, [fetchAllStandards])
+    fetchTeacherProfile()
+  }, [fetchTeacherProfile])
 
-  const handleGradeSelect = (standard: Standard) => {
+  const handleGradeSelect = (standard: GroupedStandard) => {
     setSelectedStandard(standard)
 
     // Store the selected standard in sessionStorage for the quiz creation flow
-    sessionStorage.setItem('selectedQuizStandard', JSON.stringify(standard))
+    // Convert to the format expected by the section page
+    const standardData = {
+      id: standard.standardId,
+      name: standard.standardName,
+      sections: standard.sections.map(s => ({
+        id: s.sectionId,
+        name: s.sectionName,
+        createdAt: ''
+      }))
+    }
+    sessionStorage.setItem('selectedQuizStandard', JSON.stringify(standardData))
     router.push(`/quizzes/create/section`)
   }
 
@@ -102,7 +116,7 @@ export default function QuizGradeSelectionPage() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-gray-900 mb-2">Create Quiz - Select Grade</h1>
-              <p className="text-gray-600">Choose the grade/class for your quiz</p>
+              <p className="text-gray-600">Choose from your assigned grades/classes for this quiz</p>
             </div>
           </div>
         </div>
@@ -113,7 +127,7 @@ export default function QuizGradeSelectionPage() {
             <div className="flex items-center justify-center h-64">
               <div className="text-center">
                 <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-[color:var(--primary-500)] mx-auto mb-4"></div>
-                <p className="text-gray-600 text-lg">Loading grades...</p>
+                <p className="text-gray-600 text-lg">Loading your assigned classes...</p>
               </div>
             </div>
           ) : error ? (
@@ -123,26 +137,35 @@ export default function QuizGradeSelectionPage() {
                 <p className="text-red-700 font-medium">{error}</p>
               </div>
             </div>
+          ) : groupedStandards.length === 0 ? (
+            <div className="text-center py-16">
+              <div className="text-gray-300 text-8xl mb-4">🎓</div>
+              <h3 className="text-xl font-semibold text-gray-600 mb-2">No Assigned Classes</h3>
+              <p className="text-gray-500">You have not been assigned to any classes yet. Please contact your administrator.</p>
+            </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {standards.slice().reverse().map((standard) => (
+              {groupedStandards.map((standard) => (
                 <button
-                  key={standard.id}
+                  key={standard.standardId}
                   type="button"
-                  className={`bg-cover bg-center rounded-2xl p-8 cursor-pointer transition-all duration-300 hover:scale-105 w-full h-32 min-h-[8rem] relative overflow-hidden ${selectedStandard?.id === standard.id
+                  className={`bg-cover bg-center rounded-2xl p-8 cursor-pointer transition-all duration-300 hover:scale-105 w-full h-32 min-h-[8rem] relative overflow-hidden ${selectedStandard?.standardId === standard.standardId
                       ? 'border-4 border-[color:var(--primary-500)] shadow-xl scale-105'
                       : 'border-0 hover:shadow-lg'
                     }`}
                   style={{ backgroundImage: 'url(/grade-selection.png)' }}
                   onClick={() => handleGradeSelect(standard)}
                 >
-                  {selectedStandard?.id === standard.id && (
+                  {selectedStandard?.standardId === standard.standardId && (
                     <div className="absolute inset-0 rounded-xl bg-[color:var(--primary-500)] bg-opacity-20"></div>
                   )}
                   <div className="relative z-10 h-full flex items-center justify-center">
                     <h2 className="text-xl font-bold text-white text-center drop-shadow-lg">
-                      {standard.name}
+                      {standard.standardName}
                     </h2>
+                  </div>
+                  <div className="absolute bottom-2 right-2 bg-white/90 px-2 py-1 rounded-full text-xs font-medium text-gray-700 z-10">
+                    {standard.sections.length} section{standard.sections.length !== 1 ? 's' : ''}
                   </div>
                 </button>
               ))}
